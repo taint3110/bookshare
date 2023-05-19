@@ -1,0 +1,154 @@
+@startuml
+
+skinparam linetype ortho
+
+
+entity "Book" as book {
+  *id: ObjectID <<generated>>
+  --
+  orderId?: ObjectID
+  accountId?: ObjectID
+  categoryId?: ObjectID
+  seriesId?: ObjectID
+  --
+  *title: string
+  author?: string
+  description?: string
+  category?: Categrory[]
+  bonusPointPrice?: number
+  pointBasedPrice?: number
+  releaseDate?: Date
+  publisher?: string
+  language?: string
+  bookImages?: Meida[]
+  bookCover?: EBookCoverEnum 
+  ' enum EBookCoverEnum {
+  '   SOFT = 'soft',
+  '   HARD = 'hard',
+  ' }
+  bookCondition?: EBookConditionEnum
+  ' enum EBookConditionEnum {
+  '   NEW = 'new',
+  '   OLD = 'old',
+  '   DAMAGED = 'damaged',
+  '   LOST = 'lost',
+  ' }
+  bookStatus?: EBookStatusEnum
+  ' enum EBookStatusEnum {
+  '   AVAILABLE = 'available',
+  '   UNAVAILABLE = 'unavailable',
+  '   RENTED = 'rented',
+  ' }
+  isbn?: string
+  discount?: number
+  rentCount?: number
+  availableStartDate?: Date
+  availableEndDate?: Date
+  isDeleted?: boolean
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+entity "Series" as series {
+  *id: ObjectID <<generated>>
+  --
+  *title: string
+  description?: string
+  releaseDate?: Date
+  seriesImages?: Media[]
+  bookList?: Book[]
+  isDeleted?: boolean
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+
+entity "Categrory" as category {
+  *id: ObjectID <<generated>>
+  --
+  *name: string
+  imageUrl?: Media
+  isDeleted?: boolean
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+entity "Media" as media {
+  *id: ObjectID <<generated>>
+  --
+  bookId?: ObjectID
+  categoryId?: ObjectID
+  --
+  *fileName: string
+  *imageUrl?: string
+  order?: number
+  isDeleted?: boolean
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+
+entity "Order" as order {
+  *id: ObjectID <<generated>>
+  --
+  accountId?: ObjectID
+  --
+  *status: EOrderStatusEnum
+  ' enum EApplicantStatus {
+  '   NEW = 'new',
+  '   READY = 'ready',
+  '   DONE = 'done',
+  '   FAILED = 'failed',
+  '   CANCELLED = 'cancelled',
+  '   RETURNED = 'returned',
+  '   REFUNDED = 'refunded',
+  '   OVERDUE = 'overdue',
+  ' }
+  description?: string
+  rentLength?: number[]
+  bookList?: Book[]
+  isDeleted?: boolean
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+entity "Account" as account {
+  *id: ObjectID <<generated>>
+  --
+  *email: string
+  *password: string
+  firstName?: string
+  lastName?: string
+  dateOfBirth?: Date
+  phoneNumber?: string
+  bonusPoint?: number
+  isDeleted?: boolean
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+entity "Comment" as comment {
+  *id: ObjectID <<generated>>
+  --
+  accountId?: ObjectID
+  bookId?: ObjectID
+  commentId?: ObjectID
+  --
+  *content: string
+  rating?: ERatingEnum 
+  ' ERatingEnum {
+  '  ONE = 'one',
+  '  TWO = 'two',
+  '  THREE = 'three',
+  '  FOUR = 'four',
+  '  FIVE = 'five', 
+  ' }
+  likeCount?: number
+  dislikeCount?: number
+  media?: Media[]
+  isDeleted?: boolean
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+@enduml
