@@ -1,5 +1,5 @@
-@startuml
-
+@startuml BookShare Entity Relationship Diagram
+hide circle
 skinparam linetype ortho
 
 
@@ -7,16 +7,17 @@ entity "Book" as book {
   *id: ObjectID <<generated>>
   --
   orderId?: ObjectID
-  accountId?: ObjectID
-  categoryId?: ObjectID
+  userId?: ObjectID
   seriesId?: ObjectID
+  createdBy?: ObjectID
+  updatedBy?: ObjectID
   --
   *title: string
+  *price: number
   author?: string
   description?: string
   category?: Categrory[]
   bonusPointPrice?: number
-  pointBasedPrice?: number
   releaseDate?: Date
   publisher?: string
   language?: string
@@ -52,6 +53,9 @@ entity "Book" as book {
 entity "Series" as series {
   *id: ObjectID <<generated>>
   --
+  createdBy?: ObjectID
+  updatedBy?: ObjectID
+  --
   *title: string
   description?: string
   releaseDate?: Date
@@ -66,6 +70,9 @@ entity "Series" as series {
 entity "Categrory" as category {
   *id: ObjectID <<generated>>
   --
+  createdBy?: ObjectID
+  updatedBy?: ObjectID
+  --
   *name: string
   imageUrl?: Media
   isDeleted?: boolean
@@ -78,6 +85,8 @@ entity "Media" as media {
   --
   bookId?: ObjectID
   categoryId?: ObjectID
+  createdBy?: ObjectID
+  updatedBy?: ObjectID
   --
   *fileName: string
   *imageUrl?: string
@@ -91,7 +100,8 @@ entity "Media" as media {
 entity "Order" as order {
   *id: ObjectID <<generated>>
   --
-  accountId?: ObjectID
+  userId?: ObjectID
+  updatedBy?: ObjectID
   --
   *status: EOrderStatusEnum
   ' enum EApplicantStatus {
@@ -112,11 +122,17 @@ entity "Order" as order {
   updatedAt?: Date
 }
 
-entity "Account" as account {
+entity "User" as user {
   *id: ObjectID <<generated>>
   --
   *email: string
   *password: string
+  *role: EUserRoleEnum
+  ' enum EUserRoleEnum {
+  '   ADMIN = 'admin',
+  '   CUSTOMER = 'customer',
+  '   STAFF = 'staff',
+  ' }
   firstName?: string
   lastName?: string
   dateOfBirth?: Date
@@ -130,18 +146,20 @@ entity "Account" as account {
 entity "Comment" as comment {
   *id: ObjectID <<generated>>
   --
-  accountId?: ObjectID
+  userId?: ObjectID
   bookId?: ObjectID
   commentId?: ObjectID
   --
   *content: string
+  lastContent?: string[]
+  isEditted?: boolean
   rating?: ERatingEnum 
   ' ERatingEnum {
-  '  ONE = 'one',
-  '  TWO = 'two',
-  '  THREE = 'three',
-  '  FOUR = 'four',
-  '  FIVE = 'five', 
+  '  ONE = 1,
+  '  TWO = 2,
+  '  THREE = 3,
+  '  FOUR = 4,
+  '  FIVE = 5, 
   ' }
   likeCount?: number
   dislikeCount?: number
