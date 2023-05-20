@@ -133,8 +133,7 @@ entity "User" as user {
   '   CUSTOMER = 'customer',
   '   STAFF = 'staff',
   ' }
-  newPassword?: string
-  confirmPassword?: string
+  oldPassword?: string[]
   firstName?: string
   lastName?: string
   dateOfBirth?: Date
