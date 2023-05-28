@@ -21,10 +21,10 @@ export class Book extends Entity {
   title: string;
 
   @property({
-    type: 'string',
+    type: 'number',
     required: true,
   })
-  price: string;
+  price: number;
 
   @property({
     type: 'array',
