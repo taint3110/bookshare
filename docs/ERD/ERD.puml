@@ -14,14 +14,14 @@ entity "Book" as book {
   --
   *title: string
   *price: number
-  author?: string
+  author?: string[]
   description?: string
   category?: Categrory[]
   bonusPointPrice?: number
   releaseDate?: Date
   publisher?: string
   language?: string
-  bookImages?: Meida[]
+  bookImages?: Media[]
   bookCover?: EBookCoverEnum 
   ' enum EBookCoverEnum {
   '   SOFT = 'soft',
@@ -38,7 +38,7 @@ entity "Book" as book {
   ' enum EBookStatusEnum {
   '   AVAILABLE = 'available',
   '   UNAVAILABLE = 'unavailable',
-  '   RENTED = 'rented',
+  '   RENTED = '  ',
   ' }
   isbn?: string
   discount?: number
@@ -114,6 +114,7 @@ entity "Order" as order {
   '   REFUNDED = 'refunded',
   '   OVERDUE = 'overdue',
   ' }
+  totalPrice?: number
   description?: string
   rentLength?: number[]
   bookList?: Book[]
