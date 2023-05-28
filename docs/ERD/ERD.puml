@@ -22,7 +22,7 @@ entity "Book" as book {
   publisher?: string
   language?: string
   bookImages?: Media[]
-  bookCover?: EBookCoverEnum 
+  bookCover?: EBookCoverEnum
   ' enum EBookCoverEnum {
   '   SOFT = 'soft',
   '   HARD = 'hard',
@@ -74,7 +74,7 @@ entity "Categrory" as category {
   updatedBy?: ObjectID
   --
   *name: string
-  imageUrl?: Media
+  image?: Media
   isDeleted?: boolean
   createdAt?: Date
   updatedAt?: Date
@@ -155,13 +155,13 @@ entity "Comment" as comment {
   *content: string
   lastContent?: string[]
   isEditted?: boolean
-  rating?: ERatingEnum 
+  rating?: ERatingEnum
   ' ERatingEnum {
   '  ONE = 1,
   '  TWO = 2,
   '  THREE = 3,
   '  FOUR = 4,
-  '  FIVE = 5, 
+  '  FIVE = 5,
   ' }
   likeCount?: number
   dislikeCount?: number
