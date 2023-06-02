@@ -1,5 +1,6 @@
-import {Entity, model, property} from '@loopback/repository';
+import {Entity, model, property, hasMany} from '@loopback/repository';
 import {EUserRoleEnum} from '../enums/user';
+import {Order} from './order.model';
 
 @model()
 export class User extends Entity {
@@ -71,13 +72,16 @@ export class User extends Entity {
     type: 'date',
     default: new Date(),
   })
-  createdAt?: string;
+  createdAt?: Date;
 
   @property({
     type: 'date',
     default: new Date(),
   })
-  updatedAt?: string;
+  updatedAt?: Date;
+
+  @hasMany(() => Order)
+  orders: Order[];
 
   constructor(data?: Partial<User>) {
     super(data);

@@ -1,9 +1,12 @@
-import {Entity, model, property} from '@loopback/repository';
+import {Entity, model, property, belongsTo, hasMany} from '@loopback/repository';
 import {
   EBookConditionEnum,
   EBookCoverEnum,
   EBookStatusEnum,
 } from '../enums/book';
+import {Series} from './series.model';
+import {Category} from './category.model';
+import {Media} from './media.model';
 
 @model()
 export class Book extends Entity {
@@ -111,13 +114,27 @@ export class Book extends Entity {
     type: 'date',
     default: new Date(),
   })
-  createdAt?: string;
+  createdAt?: Date;
 
   @property({
     type: 'date',
     default: new Date(),
   })
-  updateAt?: string;
+  updatedAt?: string;
+
+  @belongsTo(() => Series)
+  seriesId: string;
+
+  @property({
+    type: 'string',
+  })
+  orderId?: string;
+
+  @hasMany(() => Category)
+  categories: Category[];
+
+  @hasMany(() => Media)
+  media: Media[];
 
   constructor(data?: Partial<Book>) {
     super(data);

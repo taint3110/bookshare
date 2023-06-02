@@ -1,9 +1,9 @@
 import {Entity, model, property, hasMany} from '@loopback/repository';
-import {EOrderStatusEnum} from '../enums/order';
 import {Book} from './book.model';
+import {Media} from './media.model';
 
 @model()
-export class Order extends Entity {
+export class Series extends Entity {
   @property({
     type: 'string',
     id: true,
@@ -13,16 +13,9 @@ export class Order extends Entity {
 
   @property({
     type: 'string',
-    jsonSchema: {
-      enum: Object.values(EOrderStatusEnum),
-    },
+    required: true,
   })
-  orderStatus: EOrderStatusEnum;
-
-  @property({
-    type: 'number',
-  })
-  totalPrice?: number;
+  title: string;
 
   @property({
     type: 'string',
@@ -30,9 +23,9 @@ export class Order extends Entity {
   description?: string;
 
   @property({
-    type: 'number',
+    type: 'date',
   })
-  rentLength?: number;
+  releaseDate?: string;
 
   @property({
     type: 'boolean',
@@ -48,25 +41,23 @@ export class Order extends Entity {
 
   @property({
     type: 'date',
-    default: new Date(),
+    itemType: new Date(),
   })
-  updatedAt?: Date;
+  updatedAt?: string[];
 
   @hasMany(() => Book)
   books: Book[];
 
-  @property({
-    type: 'string',
-  })
-  userId?: string;
+  @hasMany(() => Media)
+  media: Media[];
 
-  constructor(data?: Partial<Order>) {
+  constructor(data?: Partial<Series>) {
     super(data);
   }
 }
 
-export interface OrderRelations {
+export interface SeriesRelations {
   // describe navigational properties here
 }
 
-export type OrderWithRelations = Order & OrderRelations;
+export type SeriesWithRelations = Series & SeriesRelations;

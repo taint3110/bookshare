@@ -36,13 +36,23 @@ export class Media extends Entity {
     type: 'date',
     default: new Date(),
   })
-  createdAt?: string;
+  createdAt?: Date;
 
   @property({
     type: 'date',
     default: new Date(),
   })
-  updatedAt?: string;
+  updatedAt?: Date;
+
+  @property({
+    type: 'string',
+  })
+  bookId?: string;
+
+  @property({
+    type: 'string',
+  })
+  seriesId?: string;
 
   constructor(data?: Partial<Media>) {
     super(data);

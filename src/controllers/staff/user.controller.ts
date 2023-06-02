@@ -7,23 +7,26 @@ import {
   Where,
 } from '@loopback/repository';
 import {
-  post,
-  param,
+  api,
+  del,
   get,
   getModelSchemaRef,
+  param,
   patch,
+  post,
   put,
-  del,
   requestBody,
   response,
 } from '@loopback/rest';
-import {User} from '../models';
-import {UserRepository} from '../repositories';
+import {EUserRoleEnum} from '../../enums/user';
+import {User} from '../../models';
+import {UserRepository} from '../../repositories';
 
+@api({basePath: `/${EUserRoleEnum.STAFF}`})
 export class UserController {
   constructor(
     @repository(UserRepository)
-    public userRepository : UserRepository,
+    public userRepository: UserRepository,
   ) {}
 
   @post('/users')
@@ -52,9 +55,7 @@ export class UserController {
     description: 'User model count',
     content: {'application/json': {schema: CountSchema}},
   })
-  async count(
-    @param.where(User) where?: Where<User>,
-  ): Promise<Count> {
+  async count(@param.where(User) where?: Where<User>): Promise<Count> {
     return this.userRepository.count(where);
   }
 
@@ -70,9 +71,7 @@ export class UserController {
       },
     },
   })
-  async find(
-    @param.filter(User) filter?: Filter<User>,
-  ): Promise<User[]> {
+  async find(@param.filter(User) filter?: Filter<User>): Promise<User[]> {
     return this.userRepository.find(filter);
   }
 
@@ -106,7 +105,7 @@ export class UserController {
   })
   async findById(
     @param.path.string('id') id: string,
-    @param.filter(User, {exclude: 'where'}) filter?: FilterExcludingWhere<User>
+    @param.filter(User, {exclude: 'where'}) filter?: FilterExcludingWhere<User>,
   ): Promise<User> {
     return this.userRepository.findById(id, filter);
   }

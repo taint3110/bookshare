@@ -7,23 +7,26 @@ import {
   Where,
 } from '@loopback/repository';
 import {
-  post,
-  param,
+  api,
+  del,
   get,
   getModelSchemaRef,
+  param,
   patch,
+  post,
   put,
-  del,
   requestBody,
   response,
 } from '@loopback/rest';
-import {Book} from '../models';
-import {BookRepository} from '../repositories';
+import {EUserRoleEnum} from '../../enums/user';
+import {Book} from '../../models';
+import {BookRepository} from '../../repositories';
 
+@api({basePath: `/${EUserRoleEnum.STAFF}`})
 export class BookController {
   constructor(
     @repository(BookRepository)
-    public bookRepository : BookRepository,
+    public bookRepository: BookRepository,
   ) {}
 
   @post('/books')
@@ -52,9 +55,7 @@ export class BookController {
     description: 'Book model count',
     content: {'application/json': {schema: CountSchema}},
   })
-  async count(
-    @param.where(Book) where?: Where<Book>,
-  ): Promise<Count> {
+  async count(@param.where(Book) where?: Where<Book>): Promise<Count> {
     return this.bookRepository.count(where);
   }
 
@@ -70,9 +71,7 @@ export class BookController {
       },
     },
   })
-  async find(
-    @param.filter(Book) filter?: Filter<Book>,
-  ): Promise<Book[]> {
+  async find(@param.filter(Book) filter?: Filter<Book>): Promise<Book[]> {
     return this.bookRepository.find(filter);
   }
 
@@ -106,7 +105,7 @@ export class BookController {
   })
   async findById(
     @param.path.string('id') id: string,
-    @param.filter(Book, {exclude: 'where'}) filter?: FilterExcludingWhere<Book>
+    @param.filter(Book, {exclude: 'where'}) filter?: FilterExcludingWhere<Book>,
   ): Promise<Book> {
     return this.bookRepository.findById(id, filter);
   }

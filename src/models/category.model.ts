@@ -25,13 +25,18 @@ export class Category extends Entity {
     type: 'date',
     default: new Date(),
   })
-  createdAt?: string;
+  createdAt?: Date;
 
   @property({
     type: 'date',
     default: new Date(),
   })
-  updatedAt?: string;
+  updatedAt?: Date;
+
+  @property({
+    type: 'string',
+  })
+  bookId?: string;
 
   constructor(data?: Partial<Category>) {
     super(data);

@@ -7,23 +7,26 @@ import {
   Where,
 } from '@loopback/repository';
 import {
-  post,
-  param,
+  api,
+  del,
   get,
   getModelSchemaRef,
+  param,
   patch,
+  post,
   put,
-  del,
   requestBody,
   response,
 } from '@loopback/rest';
-import {Order} from '../models';
-import {OrderRepository} from '../repositories';
+import {EUserRoleEnum} from '../../enums/user';
+import {Order} from '../../models';
+import {OrderRepository} from '../../repositories';
 
+@api({basePath: `/${EUserRoleEnum.STAFF}`})
 export class OrderController {
   constructor(
     @repository(OrderRepository)
-    public orderRepository : OrderRepository,
+    public orderRepository: OrderRepository,
   ) {}
 
   @post('/orders')
@@ -52,9 +55,7 @@ export class OrderController {
     description: 'Order model count',
     content: {'application/json': {schema: CountSchema}},
   })
-  async count(
-    @param.where(Order) where?: Where<Order>,
-  ): Promise<Count> {
+  async count(@param.where(Order) where?: Where<Order>): Promise<Count> {
     return this.orderRepository.count(where);
   }
 
@@ -70,9 +71,7 @@ export class OrderController {
       },
     },
   })
-  async find(
-    @param.filter(Order) filter?: Filter<Order>,
-  ): Promise<Order[]> {
+  async find(@param.filter(Order) filter?: Filter<Order>): Promise<Order[]> {
     return this.orderRepository.find(filter);
   }
 
@@ -106,7 +105,8 @@ export class OrderController {
   })
   async findById(
     @param.path.string('id') id: string,
-    @param.filter(Order, {exclude: 'where'}) filter?: FilterExcludingWhere<Order>
+    @param.filter(Order, {exclude: 'where'})
+    filter?: FilterExcludingWhere<Order>,
   ): Promise<Order> {
     return this.orderRepository.findById(id, filter);
   }

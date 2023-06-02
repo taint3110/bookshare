@@ -7,7 +7,6 @@ entity "Book" as book {
   *id: ObjectID <<generated>>
   --
   orderId?: ObjectID
-  userId?: ObjectID
   seriesId?: ObjectID
   createdBy?: ObjectID
   updatedBy?: ObjectID
@@ -16,12 +15,12 @@ entity "Book" as book {
   *price: number
   author?: string[]
   description?: string
-  category?: Categrory[]
+  categories?: Categrory[]
   bonusPointPrice?: number
   releaseDate?: Date
   publisher?: string
   language?: string
-  bookImages?: Media[]
+  media?: Media[]
   bookCover?: EBookCoverEnum
   ' enum EBookCoverEnum {
   '   SOFT = 'soft',
@@ -59,8 +58,8 @@ entity "Series" as series {
   *title: string
   description?: string
   releaseDate?: Date
-  seriesImages?: Media[]
-  bookList?: Book[]
+  media?: Media[]
+  books?: Book[]
   isDeleted?: boolean
   createdAt?: Date
   updatedAt?: Date
@@ -117,7 +116,7 @@ entity "Order" as order {
   totalPrice?: number
   description?: string
   rentLength?: number[]
-  bookList?: Book[]
+  books?: Book[]
   isDeleted?: boolean
   createdAt?: Date
   updatedAt?: Date
