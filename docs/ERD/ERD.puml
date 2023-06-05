@@ -7,22 +7,21 @@ entity "Book" as book {
   *id: ObjectID <<generated>>
   --
   orderId?: ObjectID
-  userId?: ObjectID
   seriesId?: ObjectID
   createdBy?: ObjectID
   updatedBy?: ObjectID
   --
   *title: string
   *price: number
-  author?: string
+  author?: string[]
   description?: string
-  category?: Categrory[]
+  categories?: Categrory[]
   bonusPointPrice?: number
   releaseDate?: Date
   publisher?: string
   language?: string
-  bookImages?: Meida[]
-  bookCover?: EBookCoverEnum 
+  media?: Media[]
+  bookCover?: EBookCoverEnum
   ' enum EBookCoverEnum {
   '   SOFT = 'soft',
   '   HARD = 'hard',
@@ -38,7 +37,7 @@ entity "Book" as book {
   ' enum EBookStatusEnum {
   '   AVAILABLE = 'available',
   '   UNAVAILABLE = 'unavailable',
-  '   RENTED = 'rented',
+  '   RENTED = '  ',
   ' }
   isbn?: string
   discount?: number
@@ -59,8 +58,8 @@ entity "Series" as series {
   *title: string
   description?: string
   releaseDate?: Date
-  seriesImages?: Media[]
-  bookList?: Book[]
+  media?: Media[]
+  books?: Book[]
   isDeleted?: boolean
   createdAt?: Date
   updatedAt?: Date
@@ -74,7 +73,7 @@ entity "Categrory" as category {
   updatedBy?: ObjectID
   --
   *name: string
-  imageUrl?: Media
+  image?: Media
   isDeleted?: boolean
   createdAt?: Date
   updatedAt?: Date
@@ -114,9 +113,10 @@ entity "Order" as order {
   '   REFUNDED = 'refunded',
   '   OVERDUE = 'overdue',
   ' }
+  totalPrice?: number
   description?: string
   rentLength?: number[]
-  bookList?: Book[]
+  books?: Book[]
   isDeleted?: boolean
   createdAt?: Date
   updatedAt?: Date
@@ -154,13 +154,13 @@ entity "Comment" as comment {
   *content: string
   lastContent?: string[]
   isEditted?: boolean
-  rating?: ERatingEnum 
+  rating?: ERatingEnum
   ' ERatingEnum {
   '  ONE = 1,
   '  TWO = 2,
   '  THREE = 3,
   '  FOUR = 4,
-  '  FIVE = 5, 
+  '  FIVE = 5,
   ' }
   likeCount?: number
   dislikeCount?: number
