@@ -1,3 +1,4 @@
+import {service} from '@loopback/core';
 import {
   Count,
   CountSchema,
@@ -21,12 +22,16 @@ import {
 import {EUserRoleEnum} from '../../enums/user';
 import {Book} from '../../models';
 import {BookRepository} from '../../repositories';
+import {BookService} from '../../services';
+import {PaginationList} from '../../types/common';
 
 @api({basePath: `/${EUserRoleEnum.STAFF}`})
 export class BookController {
   constructor(
     @repository(BookRepository)
     public bookRepository: BookRepository,
+    @service(BookService)
+    public bookService: BookService,
   ) {}
 
   @post('/books')
@@ -145,5 +150,22 @@ export class BookController {
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
     await this.bookRepository.deleteById(id);
+  }
+
+  @get('/books/paginate')
+  @response(200, {
+    description: 'Array of Boook model instances',
+    content: {
+      'application/json': {
+        schema: {
+          type: 'object',
+        },
+      },
+    },
+  })
+  async paginate(
+    @param.filter(Book) filter?: Filter<Book>,
+  ): Promise<PaginationList<Book>> {
+    return this.bookService.paginate(filter);
   }
 }
