@@ -1,0 +1,153 @@
+import {
+  Count,
+  CountSchema,
+  Filter,
+  FilterExcludingWhere,
+  repository,
+  Where,
+} from '@loopback/repository';
+import {
+  post,
+  param,
+  get,
+  getModelSchemaRef,
+  patch,
+  put,
+  del,
+  requestBody,
+  response,
+  api,
+} from '@loopback/rest';
+import {EUserRoleEnum} from '../../enums/user';
+import {Series} from '../../models';
+import {SeriesRepository} from '../../repositories';
+
+@api({basePath: `/${EUserRoleEnum.STAFF}`})
+export class SeriesController {
+  constructor(
+    @repository(SeriesRepository)
+    public seriesRepository : SeriesRepository,
+  ) {}
+
+  @post('/series')
+  @response(200, {
+    description: 'Series model instance',
+    content: {'application/json': {schema: getModelSchemaRef(Series)}},
+  })
+  async create(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(Series, {
+            title: 'NewSeries',
+            exclude: ['id'],
+          }),
+        },
+      },
+    })
+    series: Omit<Series, 'id'>,
+  ): Promise<Series> {
+    return this.seriesRepository.create(series);
+  }
+
+  @get('/series/count')
+  @response(200, {
+    description: 'Series model count',
+    content: {'application/json': {schema: CountSchema}},
+  })
+  async count(
+    @param.where(Series) where?: Where<Series>,
+  ): Promise<Count> {
+    return this.seriesRepository.count(where);
+  }
+
+  @get('/series')
+  @response(200, {
+    description: 'Array of Series model instances',
+    content: {
+      'application/json': {
+        schema: {
+          type: 'array',
+          items: getModelSchemaRef(Series, {includeRelations: true}),
+        },
+      },
+    },
+  })
+  async find(
+    @param.filter(Series) filter?: Filter<Series>,
+  ): Promise<Series[]> {
+    return this.seriesRepository.find(filter);
+  }
+
+  @patch('/series')
+  @response(200, {
+    description: 'Series PATCH success count',
+    content: {'application/json': {schema: CountSchema}},
+  })
+  async updateAll(
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(Series, {partial: true}),
+        },
+      },
+    })
+    series: Series,
+    @param.where(Series) where?: Where<Series>,
+  ): Promise<Count> {
+    return this.seriesRepository.updateAll(series, where);
+  }
+
+  @get('/series/{id}')
+  @response(200, {
+    description: 'Series model instance',
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(Series, {includeRelations: true}),
+      },
+    },
+  })
+  async findById(
+    @param.path.string('id') id: string,
+    @param.filter(Series, {exclude: 'where'}) filter?: FilterExcludingWhere<Series>
+  ): Promise<Series> {
+    return this.seriesRepository.findById(id, filter);
+  }
+
+  @patch('/series/{id}')
+  @response(204, {
+    description: 'Series PATCH success',
+  })
+  async updateById(
+    @param.path.string('id') id: string,
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(Series, {partial: true}),
+        },
+      },
+    })
+    series: Series,
+  ): Promise<void> {
+    await this.seriesRepository.updateById(id, series);
+  }
+
+  @put('/series/{id}')
+  @response(204, {
+    description: 'Series PUT success',
+  })
+  async replaceById(
+    @param.path.string('id') id: string,
+    @requestBody() series: Series,
+  ): Promise<void> {
+    await this.seriesRepository.replaceById(id, series);
+  }
+
+  @del('/series/{id}')
+  @response(204, {
+    description: 'Series DELETE success',
+  })
+  async deleteById(@param.path.string('id') id: string): Promise<void> {
+    await this.seriesRepository.deleteById(id);
+  }
+}

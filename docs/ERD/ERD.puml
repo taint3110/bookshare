@@ -1,0 +1,173 @@
+@startuml BookShare Entity Relationship Diagram
+hide circle
+skinparam linetype ortho
+
+
+entity "Book" as book {
+  *id: ObjectID <<generated>>
+  --
+  orderId?: ObjectID
+  seriesId?: ObjectID
+  createdBy?: ObjectID
+  updatedBy?: ObjectID
+  --
+  *title: string
+  *price: number
+  author?: string[]
+  description?: string
+  categories?: Categrory[]
+  bonusPointPrice?: number
+  releaseDate?: Date
+  publisher?: string
+  language?: string
+  media?: Media[]
+  bookCover?: EBookCoverEnum
+  ' enum EBookCoverEnum {
+  '   SOFT = 'soft',
+  '   HARD = 'hard',
+  ' }
+  bookCondition?: EBookConditionEnum
+  ' enum EBookConditionEnum {
+  '   NEW = 'new',
+  '   OLD = 'old',
+  '   DAMAGED = 'damaged',
+  '   LOST = 'lost',
+  ' }
+  bookStatus?: EBookStatusEnum
+  ' enum EBookStatusEnum {
+  '   AVAILABLE = 'available',
+  '   UNAVAILABLE = 'unavailable',
+  '   RENTED = '  ',
+  ' }
+  isbn?: string
+  discount?: number
+  rentCount?: number
+  availableStartDate?: Date
+  availableEndDate?: Date
+  isDeleted?: boolean
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+entity "Series" as series {
+  *id: ObjectID <<generated>>
+  --
+  createdBy?: ObjectID
+  updatedBy?: ObjectID
+  --
+  *title: string
+  description?: string
+  releaseDate?: Date
+  media?: Media[]
+  books?: Book[]
+  isDeleted?: boolean
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+
+entity "Categrory" as category {
+  *id: ObjectID <<generated>>
+  --
+  createdBy?: ObjectID
+  updatedBy?: ObjectID
+  --
+  *name: string
+  image?: Media
+  isDeleted?: boolean
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+entity "Media" as media {
+  *id: ObjectID <<generated>>
+  --
+  bookId?: ObjectID
+  categoryId?: ObjectID
+  createdBy?: ObjectID
+  updatedBy?: ObjectID
+  --
+  *fileName: string
+  *imageUrl?: string
+  order?: number
+  isDeleted?: boolean
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+
+entity "Order" as order {
+  *id: ObjectID <<generated>>
+  --
+  userId?: ObjectID
+  updatedBy?: ObjectID
+  --
+  *status: EOrderStatusEnum
+  ' enum EApplicantStatus {
+  '   NEW = 'new',
+  '   READY = 'ready',
+  '   DONE = 'done',
+  '   FAILED = 'failed',
+  '   CANCELLED = 'cancelled',
+  '   RETURNED = 'returned',
+  '   REFUNDED = 'refunded',
+  '   OVERDUE = 'overdue',
+  ' }
+  totalPrice?: number
+  description?: string
+  rentLength?: number[]
+  books?: Book[]
+  isDeleted?: boolean
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+entity "User" as user {
+  *id: ObjectID <<generated>>
+  --
+  *email: string
+  *password: string
+  *role: EUserRoleEnum
+  ' enum EUserRoleEnum {
+  '   ADMIN = 'admin',
+  '   CUSTOMER = 'customer',
+  '   STAFF = 'staff',
+  ' }
+  oldPassword?: string[]
+  firstName?: string
+  lastName?: string
+  dateOfBirth?: Date
+  phoneNumber?: string
+  bonusPoint?: number
+  isDeleted?: boolean
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+entity "Comment" as comment {
+  *id: ObjectID <<generated>>
+  --
+  userId?: ObjectID
+  bookId?: ObjectID
+  commentId?: ObjectID
+  --
+  *content: string
+  lastContent?: string[]
+  isEditted?: boolean
+  rating?: ERatingEnum
+  ' ERatingEnum {
+  '  ONE = 1,
+  '  TWO = 2,
+  '  THREE = 3,
+  '  FOUR = 4,
+  '  FIVE = 5,
+  ' }
+  likeCount?: number
+  dislikeCount?: number
+  media?: Media[]
+  isDeleted?: boolean
+  createdAt?: Date
+  updatedAt?: Date
+}
+
+@enduml
