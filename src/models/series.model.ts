@@ -23,6 +23,12 @@ export class Series extends Entity {
   description?: string;
 
   @property({
+    type: 'array',
+    itemType: 'string',
+  })
+  author?: string[];
+
+  @property({
     type: 'date',
   })
   releaseDate?: string;
