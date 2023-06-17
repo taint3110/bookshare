@@ -1,12 +1,18 @@
-import {Entity, model, property, belongsTo, hasMany} from '@loopback/repository';
+import {
+  Entity,
+  belongsTo,
+  hasMany,
+  model,
+  property,
+} from '@loopback/repository';
 import {
   EBookConditionEnum,
   EBookCoverEnum,
   EBookStatusEnum,
 } from '../enums/book';
-import {Series} from './series.model';
 import {Category} from './category.model';
 import {Media} from './media.model';
+import {Series} from './series.model';
 
 @model()
 export class Book extends Entity {

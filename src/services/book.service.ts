@@ -14,6 +14,8 @@ export class BookService {
 
   async paginate(filter?: Filter<Book>): Promise<PaginationList<Book>> {
     const pipeline: AggregationPipeline = getDefaultPipeline(filter);
+    const titleQuery: AggregationPipeline | null =
+      getTitleFilterPipeline(filter);
     const countPipeline: AggregationPipeline = [
       {
         $match: {
@@ -26,15 +28,12 @@ export class BookService {
         $count: 'totalCount',
       },
     ];
-    const titleQuery: AggregationPipeline | null =
-      getTitleFilterPipeline(filter);
-    if (titleQuery) {
-      pipeline.unshift(...titleQuery);
-      countPipeline.unshift(...titleQuery);
-    }
     const skip = filter?.skip ?? filter?.offset;
     if (skip) {
       pipeline.push({
+        $skip: skip,
+      });
+      countPipeline.push({
         $skip: skip,
       });
     }
@@ -42,6 +41,13 @@ export class BookService {
       pipeline.push({
         $limit: filter?.limit,
       });
+      countPipeline.push({
+        $limit: filter?.limit,
+      });
+    }
+    if (titleQuery) {
+      pipeline.unshift(...titleQuery);
+      countPipeline.unshift(...titleQuery);
     }
     const bookCollection =
       this.bookRepository.dataSource?.connector?.collection(

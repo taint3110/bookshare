@@ -1,11 +1,13 @@
 import {Filter} from '@loopback/repository';
 import get from 'lodash/get';
 import trim from 'lodash/trim';
-import {Book} from '../models';
+import {Series} from '../models';
 import {AggregationPipeline} from '../types';
 import {convertLoopbackFilterOrderToMongoAggregationSort} from './filter';
 
-export function getDefaultPipeline(filter?: Filter<Book>): AggregationPipeline {
+export function getDefaultPipeline(
+  filter?: Filter<Series>,
+): AggregationPipeline {
   return [
     {
       $match: {
@@ -15,28 +17,15 @@ export function getDefaultPipeline(filter?: Filter<Book>): AggregationPipeline {
       },
     },
     {
-      $lookup: {
-        from: 'Series',
-        localField: 'seriesId',
-        foreignField: '_id',
-        as: 'series',
-      },
-    },
-    {
-      $unwind: {
-        path: '$series',
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
       $project: {
         id: '$_id',
         _id: '$$REMOVE',
         title: '$title',
         author: '$author',
-        price: '$price',
+        releaseDate: '$releaseDate',
         status: '$status',
-        series: '$series',
+        description: '$description',
+        isDeleted: '$isDeleted',
       },
     },
     {
@@ -50,14 +39,14 @@ export function getDefaultPipeline(filter?: Filter<Book>): AggregationPipeline {
 }
 
 export function getTitleFilterPipeline(
-  filter?: Filter<Book>,
+  filter?: Filter<Series>,
 ): AggregationPipeline | null {
   const titleFilter = String(get(filter, 'where.title', ''));
   if (titleFilter) {
     const titleQuery: AggregationPipeline = [
       {
         $addFields: {
-          regexUnitNumber: {
+          regexTitle: {
             $regexMatch: {
               input: {$toString: '$title'},
               regex: `.*${trim(titleFilter)}.*`,
@@ -69,12 +58,12 @@ export function getTitleFilterPipeline(
       {
         $match: {
           $expr: {
-            $or: ['$regexUnitNumber'],
+            $or: ['$regexTitle'],
           },
         },
       },
       {
-        $unset: ['regexUnitNumber'],
+        $unset: ['regexTitle'],
       },
     ];
     return titleQuery;
