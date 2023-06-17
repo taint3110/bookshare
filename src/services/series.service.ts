@@ -15,23 +15,11 @@ export class SeriesService {
   async paginate(filter?: Filter<Series>): Promise<PaginationList<Series>> {
     const pipeline: AggregationPipeline = getDefaultPipeline(filter);
     const countPipeline: AggregationPipeline = [
-      {
-        $match: {
-          isDeleted: {
-            $ne: true,
-          },
-        },
-      },
+      ...pipeline,
       {
         $count: 'totalCount',
       },
     ];
-    const titleQuery: AggregationPipeline | null =
-      getTitleFilterPipeline(filter);
-    if (titleQuery) {
-      pipeline.unshift(...titleQuery);
-      countPipeline.unshift(...titleQuery);
-    }
     const skip = filter?.skip ?? filter?.offset;
     if (skip) {
       pipeline.push({
@@ -42,6 +30,12 @@ export class SeriesService {
       pipeline.push({
         $limit: filter?.limit,
       });
+    }
+    const titleQuery: AggregationPipeline | null =
+      getTitleFilterPipeline(filter);
+    if (titleQuery) {
+      pipeline.unshift(...titleQuery);
+      countPipeline.unshift(...titleQuery);
     }
     const seriesCollection =
       this.seriesRepository.dataSource?.connector?.collection(

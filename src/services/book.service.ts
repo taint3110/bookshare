@@ -17,13 +17,7 @@ export class BookService {
     const titleQuery: AggregationPipeline | null =
       getTitleFilterPipeline(filter);
     const countPipeline: AggregationPipeline = [
-      {
-        $match: {
-          isDeleted: {
-            $ne: true,
-          },
-        },
-      },
+      ...pipeline,
       {
         $count: 'totalCount',
       },
@@ -33,15 +27,9 @@ export class BookService {
       pipeline.push({
         $skip: skip,
       });
-      countPipeline.push({
-        $skip: skip,
-      });
     }
     if (filter?.limit) {
       pipeline.push({
-        $limit: filter?.limit,
-      });
-      countPipeline.push({
         $limit: filter?.limit,
       });
     }
