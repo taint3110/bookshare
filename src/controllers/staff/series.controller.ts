@@ -150,7 +150,12 @@ export class SeriesController {
     description: 'Series DELETE success',
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
-    await this.seriesRepository.deleteById(id);
+    await this.seriesRepository.updateById(id, {
+      isDeleted: true,
+    });
+    await this.seriesRepository.books(id).patch({
+      isDeleted: true,
+    });
   }
 
   @get('/series/paginate')

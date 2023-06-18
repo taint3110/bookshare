@@ -149,7 +149,9 @@ export class BookController {
     description: 'Book DELETE success',
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
-    await this.bookRepository.deleteById(id);
+    await this.bookRepository.updateById(id, {
+      isDeleted: true,
+    });
   }
 
   @get('/books/paginate')

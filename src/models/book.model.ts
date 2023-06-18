@@ -10,7 +10,6 @@ import {
   EBookCoverEnum,
   EBookStatusEnum,
 } from '../enums/book';
-import {Category} from './category.model';
 import {Media} from './media.model';
 import {Series} from './series.model';
 
@@ -126,7 +125,7 @@ export class Book extends Entity {
     type: 'date',
     default: new Date(),
   })
-  updatedAt?: string;
+  updatedAt?: Date;
 
   @belongsTo(() => Series)
   seriesId: string;
@@ -135,9 +134,6 @@ export class Book extends Entity {
     type: 'string',
   })
   orderId?: string;
-
-  @hasMany(() => Category)
-  categories: Category[];
 
   @hasMany(() => Media)
   media: Media[];
