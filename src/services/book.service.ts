@@ -1,9 +1,13 @@
 import {BindingScope, injectable} from '@loopback/core';
 import {Filter, repository} from '@loopback/repository';
-import {Book} from '../models';
+import {Book, BookWithRelations} from '../models';
 import {BookRepository} from '../repositories';
 import {AggregationCount, AggregationPipeline, PaginationList} from '../types';
-import {getDefaultPipeline, getTitleFilterPipeline} from '../utils/book';
+import {
+  getBookDetailPipeline,
+  getDefaultPipeline,
+  getTitleFilterPipeline,
+} from '../utils/book';
 
 @injectable({scope: BindingScope.TRANSIENT})
 export class BookService {
@@ -54,15 +58,15 @@ export class BookService {
   }
 
   //*INFO: May use later
-  // async getDetails(buildiumUnitId: number): Promise<UnitWithRelations> {
-  //   const pipeline: AggregationPipeline = getRoomDetailPipeline(buildiumUnitId);
-  //   const unitCollection =
-  //     this.bookRepository.dataSource?.connector?.collection(
-  //       this.bookRepository?.modelClass?.name,
-  //     );
-  //   const [result] = (await unitCollection.aggregate(pipeline).get()) as [
-  //     UnitWithRelations,
-  //   ];
-  //   return result;
-  // }
+  async getDetails(bookId: string): Promise<BookWithRelations> {
+    const pipeline: AggregationPipeline = getBookDetailPipeline(bookId);
+    const bookCollection =
+      this.bookRepository.dataSource?.connector?.collection(
+        this.bookRepository?.modelClass?.name,
+      );
+    const [result] = (await bookCollection.aggregate(pipeline).get()) as [
+      BookWithRelations,
+    ];
+    return result;
+  }
 }

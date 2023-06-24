@@ -12,6 +12,7 @@ import {
 } from '../enums/book';
 import {Media} from './media.model';
 import {Series} from './series.model';
+import {BookCategory} from './book-category.model';
 
 @model()
 export class Book extends Entity {
@@ -138,13 +139,18 @@ export class Book extends Entity {
   @hasMany(() => Media)
   media: Media[];
 
+  @hasMany(() => BookCategory)
+  bookCategories: BookCategory[];
+
   constructor(data?: Partial<Book>) {
     super(data);
   }
 }
 
 export interface BookRelations {
-  // describe navigational properties here
+  series?: Series;
+  media?: Media[];
+  categories?: BookCategory[];
 }
 
 export type BookWithRelations = Book & BookRelations;

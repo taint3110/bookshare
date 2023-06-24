@@ -27,6 +27,16 @@ export class BookCategory extends Entity {
   })
   updatedAt?: Date;
 
+  @property({
+    type: 'string',
+  })
+  bookId?: string;
+
+  @property({
+    type: 'string',
+  })
+  categoryId?: string;
+
   constructor(data?: Partial<BookCategory>) {
     super(data);
   }

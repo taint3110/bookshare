@@ -3,7 +3,6 @@ import {
   Count,
   CountSchema,
   Filter,
-  FilterExcludingWhere,
   repository,
   Where,
 } from '@loopback/repository';
@@ -20,7 +19,7 @@ import {
   response,
 } from '@loopback/rest';
 import {EUserRoleEnum} from '../../enums/user';
-import {Book} from '../../models';
+import {Book, BookWithRelations} from '../../models';
 import {BookRepository} from '../../repositories';
 import {BookService} from '../../services';
 import {PaginationList} from '../../types/common';
@@ -110,9 +109,8 @@ export class BookController {
   })
   async findById(
     @param.path.string('id') id: string,
-    @param.filter(Book, {exclude: 'where'}) filter?: FilterExcludingWhere<Book>,
-  ): Promise<Book> {
-    return this.bookRepository.findById(id, filter);
+  ): Promise<BookWithRelations> {
+    return this.bookService.getDetails(id);
   }
 
   @patch('/books/{id}')
@@ -128,7 +126,7 @@ export class BookController {
         },
       },
     })
-    book: Book,
+    book: BookWithRelations,
   ): Promise<void> {
     await this.bookRepository.updateById(id, book);
   }
