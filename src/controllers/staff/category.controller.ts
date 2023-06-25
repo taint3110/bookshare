@@ -128,7 +128,10 @@ export class CategoryController {
     })
     category: Category,
   ): Promise<void> {
-    await this.categoryRepository.updateById(id, category);
+    await this.categoryRepository.updateById(id, {
+      ...category,
+      updatedAt: new Date(),
+    });
   }
 
   @put('/categories/{id}')

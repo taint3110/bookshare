@@ -20,15 +20,18 @@ import {
 } from '@loopback/rest';
 import {EUserRoleEnum} from '../../enums/user';
 import {Book, BookWithRelations} from '../../models';
-import {BookRepository} from '../../repositories';
+import {BookCategoryRepository, BookRepository} from '../../repositories';
 import {BookService} from '../../services';
-import {PaginationList} from '../../types/common';
+import {PaginationList} from '../../types';
+import {getValidArray} from '../../utils/common';
 
 @api({basePath: `/${EUserRoleEnum.STAFF}`})
 export class BookController {
   constructor(
     @repository(BookRepository)
     public bookRepository: BookRepository,
+    @repository(BookCategoryRepository)
+    public bookCategoryRepository: BookCategoryRepository,
     @service(BookService)
     public bookService: BookService,
   ) {}
@@ -127,8 +130,21 @@ export class BookController {
       },
     })
     book: BookWithRelations,
+    @param.query.string('categoryIds') categoryIds?: string,
   ): Promise<void> {
-    await this.bookRepository.updateById(id, book);
+    await this.bookRepository.bookCategories(id).delete();
+    if (categoryIds) {
+      const ids: string[] = getValidArray(categoryIds.split(','));
+      if (Array.isArray(ids) && ids.length > 0) {
+        getValidArray(ids).map(async categoryId => {
+          await this.bookCategoryRepository.create({
+            bookId: id,
+            categoryId: String(categoryId),
+          });
+        });
+      }
+    }
+    await this.bookRepository.updateById(id, {...book, updatedAt: new Date()});
   }
 
   @put('/books/{id}')

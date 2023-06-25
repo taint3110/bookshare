@@ -150,7 +150,7 @@ export class Book extends Entity {
 export interface BookRelations {
   series?: Series;
   media?: Media[];
-  categories?: BookCategory[];
+  bookCategories?: BookCategory[];
 }
 
 export type BookWithRelations = Book & BookRelations;

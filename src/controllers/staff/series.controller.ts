@@ -131,7 +131,10 @@ export class SeriesController {
     })
     series: Series,
   ): Promise<void> {
-    await this.seriesRepository.updateById(id, series);
+    await this.seriesRepository.updateById(id, {
+      ...series,
+      updatedAt: new Date(),
+    });
   }
 
   @put('/series/{id}')

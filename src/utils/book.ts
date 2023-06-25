@@ -29,6 +29,50 @@ export function getDefaultPipeline(filter?: Filter<Book>): AggregationPipeline {
       },
     },
     {
+      $lookup: {
+        from: 'BookCategory',
+        localField: '_id',
+        foreignField: 'bookId',
+        as: 'bookCategories',
+      },
+    },
+    {
+      $unwind: {
+        path: '$bookCategories',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
+        from: 'Category',
+        localField: 'bookCategories.categoryId',
+        foreignField: '_id',
+        as: 'bookCategoryList',
+      },
+    },
+    {
+      $unwind: {
+        path: '$bookCategoryList',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $group: {
+        _id: '$_id',
+        bookCategoryList: {
+          $push: '$bookCategoryList',
+        },
+        data: {$first: '$$ROOT'},
+      },
+    },
+    {
+      $replaceRoot: {
+        newRoot: {
+          $mergeObjects: ['$data', {bookCategoryList: '$bookCategoryList'}],
+        },
+      },
+    },
+    {
       $project: {
         id: '$_id',
         _id: '$$REMOVE',
@@ -37,6 +81,7 @@ export function getDefaultPipeline(filter?: Filter<Book>): AggregationPipeline {
         price: '$price',
         status: '$status',
         series: '$series',
+        categories: '$bookCategoryList',
         createdAt: '$createdAt',
         updatedAt: '$updatedAt',
       },
@@ -137,6 +182,28 @@ export function getBookDetailPipeline(bookId: string): AggregationPipeline {
         localField: 'bookCategories.categoryId',
         foreignField: '_id',
         as: 'bookCategoryList',
+      },
+    },
+    {
+      $unwind: {
+        path: '$bookCategoryList',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $group: {
+        _id: '$_id',
+        bookCategoryList: {
+          $push: '$bookCategoryList',
+        },
+        data: {$first: '$$ROOT'},
+      },
+    },
+    {
+      $replaceRoot: {
+        newRoot: {
+          $mergeObjects: ['$data', {bookCategoryList: '$bookCategoryList'}],
+        },
       },
     },
     {
