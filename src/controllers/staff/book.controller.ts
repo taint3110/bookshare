@@ -3,7 +3,6 @@ import {
   Count,
   CountSchema,
   Filter,
-  FilterExcludingWhere,
   repository,
   Where,
 } from '@loopback/repository';
@@ -20,16 +19,19 @@ import {
   response,
 } from '@loopback/rest';
 import {EUserRoleEnum} from '../../enums/user';
-import {Book} from '../../models';
-import {BookRepository} from '../../repositories';
+import {Book, BookWithRelations} from '../../models';
+import {BookCategoryRepository, BookRepository} from '../../repositories';
 import {BookService} from '../../services';
-import {PaginationList} from '../../types/common';
+import {PaginationList} from '../../types';
+import {getValidArray} from '../../utils/common';
 
 @api({basePath: `/${EUserRoleEnum.STAFF}`})
 export class BookController {
   constructor(
     @repository(BookRepository)
     public bookRepository: BookRepository,
+    @repository(BookCategoryRepository)
+    public bookCategoryRepository: BookCategoryRepository,
     @service(BookService)
     public bookService: BookService,
   ) {}
@@ -110,9 +112,8 @@ export class BookController {
   })
   async findById(
     @param.path.string('id') id: string,
-    @param.filter(Book, {exclude: 'where'}) filter?: FilterExcludingWhere<Book>,
-  ): Promise<Book> {
-    return this.bookRepository.findById(id, filter);
+  ): Promise<BookWithRelations> {
+    return this.bookService.getDetails(id);
   }
 
   @patch('/books/{id}')
@@ -128,9 +129,22 @@ export class BookController {
         },
       },
     })
-    book: Book,
+    book: BookWithRelations,
+    @param.query.string('categoryIds') categoryIds?: string,
   ): Promise<void> {
-    await this.bookRepository.updateById(id, book);
+    await this.bookRepository.bookCategories(id).delete();
+    if (categoryIds) {
+      const ids: string[] = getValidArray(categoryIds.split(','));
+      if (Array.isArray(ids) && ids.length > 0) {
+        getValidArray(ids).map(async categoryId => {
+          await this.bookCategoryRepository.create({
+            bookId: id,
+            categoryId: String(categoryId),
+          });
+        });
+      }
+    }
+    await this.bookRepository.updateById(id, {...book, updatedAt: new Date()});
   }
 
   @put('/books/{id}')
@@ -149,7 +163,9 @@ export class BookController {
     description: 'Book DELETE success',
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
-    await this.bookRepository.deleteById(id);
+    await this.bookRepository.updateById(id, {
+      isDeleted: true,
+    });
   }
 
   @get('/books/paginate')

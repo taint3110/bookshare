@@ -1,3 +1,4 @@
+import {service} from '@loopback/core';
 import {
   Count,
   CountSchema,
@@ -7,26 +8,30 @@ import {
   Where,
 } from '@loopback/repository';
 import {
-  post,
-  param,
+  api,
+  del,
   get,
   getModelSchemaRef,
+  param,
   patch,
+  post,
   put,
-  del,
   requestBody,
   response,
-  api,
 } from '@loopback/rest';
 import {EUserRoleEnum} from '../../enums/user';
 import {Series} from '../../models';
 import {SeriesRepository} from '../../repositories';
+import {SeriesService} from '../../services/series.service';
+import {PaginationList} from '../../types';
 
 @api({basePath: `/${EUserRoleEnum.STAFF}`})
 export class SeriesController {
   constructor(
     @repository(SeriesRepository)
-    public seriesRepository : SeriesRepository,
+    public seriesRepository: SeriesRepository,
+    @service(SeriesService)
+    public seriesService: SeriesService,
   ) {}
 
   @post('/series')
@@ -55,9 +60,7 @@ export class SeriesController {
     description: 'Series model count',
     content: {'application/json': {schema: CountSchema}},
   })
-  async count(
-    @param.where(Series) where?: Where<Series>,
-  ): Promise<Count> {
+  async count(@param.where(Series) where?: Where<Series>): Promise<Count> {
     return this.seriesRepository.count(where);
   }
 
@@ -73,9 +76,7 @@ export class SeriesController {
       },
     },
   })
-  async find(
-    @param.filter(Series) filter?: Filter<Series>,
-  ): Promise<Series[]> {
+  async find(@param.filter(Series) filter?: Filter<Series>): Promise<Series[]> {
     return this.seriesRepository.find(filter);
   }
 
@@ -109,7 +110,8 @@ export class SeriesController {
   })
   async findById(
     @param.path.string('id') id: string,
-    @param.filter(Series, {exclude: 'where'}) filter?: FilterExcludingWhere<Series>
+    @param.filter(Series, {exclude: 'where'})
+    filter?: FilterExcludingWhere<Series>,
   ): Promise<Series> {
     return this.seriesRepository.findById(id, filter);
   }
@@ -129,7 +131,10 @@ export class SeriesController {
     })
     series: Series,
   ): Promise<void> {
-    await this.seriesRepository.updateById(id, series);
+    await this.seriesRepository.updateById(id, {
+      ...series,
+      updatedAt: new Date(),
+    });
   }
 
   @put('/series/{id}')
@@ -148,6 +153,28 @@ export class SeriesController {
     description: 'Series DELETE success',
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
-    await this.seriesRepository.deleteById(id);
+    await this.seriesRepository.updateById(id, {
+      isDeleted: true,
+    });
+    await this.seriesRepository.books(id).patch({
+      isDeleted: true,
+    });
+  }
+
+  @get('/series/paginate')
+  @response(200, {
+    description: 'Array of Series model instances',
+    content: {
+      'application/json': {
+        schema: {
+          type: 'object',
+        },
+      },
+    },
+  })
+  async paginate(
+    @param.filter(Series) filter?: Filter<Series>,
+  ): Promise<PaginationList<Series>> {
+    return this.seriesService.paginate(filter);
   }
 }
