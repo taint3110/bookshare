@@ -21,7 +21,7 @@ import {
 } from '@loopback/rest';
 import {EUserRoleEnum} from '../../enums/user';
 import {Series} from '../../models';
-import {SeriesRepository} from '../../repositories';
+import {MediaRepository, SeriesRepository} from '../../repositories';
 import {SeriesService} from '../../services/series.service';
 import {PaginationList} from '../../types';
 
@@ -30,6 +30,8 @@ export class SeriesController {
   constructor(
     @repository(SeriesRepository)
     public seriesRepository: SeriesRepository,
+    @repository(MediaRepository)
+    public mediaRepository: MediaRepository,
     @service(SeriesService)
     public seriesService: SeriesService,
   ) {}
@@ -153,12 +155,17 @@ export class SeriesController {
     description: 'Series DELETE success',
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
-    await this.seriesRepository.updateById(id, {
-      isDeleted: true,
-    });
-    await this.seriesRepository.books(id).patch({
-      isDeleted: true,
-    });
+    await Promise.all([
+      this.seriesRepository.updateById(id, {
+        isDeleted: true,
+      }),
+      this.seriesRepository.books(id).patch({
+        isDeleted: true,
+      }),
+      this.mediaRepository.deleteAll({
+        seriesId: id,
+      }),
+    ]);
   }
 
   @get('/series/paginate')

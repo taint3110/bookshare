@@ -16,6 +16,20 @@ export function getDefaultPipeline(filter?: Filter<Book>): AggregationPipeline {
     },
     {
       $lookup: {
+        from: 'Media',
+        localField: '_id',
+        foreignField: 'bookId',
+        as: 'media',
+      },
+    },
+    {
+      $unwind: {
+        path: '$media',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $lookup: {
         from: 'Series',
         localField: 'seriesId',
         foreignField: '_id',
@@ -79,9 +93,23 @@ export function getDefaultPipeline(filter?: Filter<Book>): AggregationPipeline {
         title: '$title',
         author: '$author',
         price: '$price',
-        status: '$status',
+        bookStatus: '$bookStatus',
         series: '$series',
         categories: '$bookCategoryList',
+        description: '$description',
+        bonusPointPrice: '$bonusPointPrice',
+        releaseDate: '$releaseDate',
+        publisher: '$publisher',
+        language: '$language',
+        media: '$media',
+        bookCover: '$bookCover',
+        bookCondition: '$bookCondition',
+        isbn: '$isbn',
+        discount: '$discount',
+        rentCount: '$rentCount',
+        availableStartDate: '$availableStartDate',
+        availableEndDate: '$availableEndDate',
+        isDeleted: '$isDeleted',
         createdAt: '$createdAt',
         updatedAt: '$updatedAt',
       },
@@ -146,6 +174,20 @@ export function getBookDetailPipeline(bookId: string): AggregationPipeline {
         idToString: {
           $eq: String(bookId),
         },
+      },
+    },
+    {
+      $lookup: {
+        from: 'Media',
+        localField: '_id',
+        foreignField: 'bookId',
+        as: 'media',
+      },
+    },
+    {
+      $unwind: {
+        path: '$media',
+        preserveNullAndEmptyArrays: true,
       },
     },
     {
