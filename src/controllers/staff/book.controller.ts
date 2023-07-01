@@ -20,7 +20,11 @@ import {
 } from '@loopback/rest';
 import {EUserRoleEnum} from '../../enums/user';
 import {Book, BookWithRelations} from '../../models';
-import {BookCategoryRepository, BookRepository} from '../../repositories';
+import {
+  BookCategoryRepository,
+  BookRepository,
+  MediaRepository,
+} from '../../repositories';
 import {BookService} from '../../services';
 import {PaginationList} from '../../types';
 import {getValidArray} from '../../utils/common';
@@ -30,6 +34,8 @@ export class BookController {
   constructor(
     @repository(BookRepository)
     public bookRepository: BookRepository,
+    @repository(MediaRepository)
+    public mediaRepository: MediaRepository,
     @repository(BookCategoryRepository)
     public bookCategoryRepository: BookCategoryRepository,
     @service(BookService)
@@ -163,9 +169,14 @@ export class BookController {
     description: 'Book DELETE success',
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
-    await this.bookRepository.updateById(id, {
-      isDeleted: true,
-    });
+    await Promise.all([
+      this.bookRepository.updateById(id, {
+        isDeleted: true,
+      }),
+      this.mediaRepository.deleteAll({
+        bookId: id,
+      }),
+    ]);
   }
 
   @get('/books/paginate')

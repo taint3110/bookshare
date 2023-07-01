@@ -19,9 +19,10 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
+import set from 'lodash/set';
 import {EUserRoleEnum} from '../../enums/user';
-import {Series} from '../../models';
-import {SeriesRepository} from '../../repositories';
+import {Media, Series} from '../../models';
+import {MediaRepository, SeriesRepository} from '../../repositories';
 import {SeriesService} from '../../services/series.service';
 import {PaginationList} from '../../types';
 
@@ -30,6 +31,8 @@ export class SeriesController {
   constructor(
     @repository(SeriesRepository)
     public seriesRepository: SeriesRepository,
+    @repository(MediaRepository)
+    public mediaRepository: MediaRepository,
     @service(SeriesService)
     public seriesService: SeriesService,
   ) {}
@@ -113,7 +116,16 @@ export class SeriesController {
     @param.filter(Series, {exclude: 'where'})
     filter?: FilterExcludingWhere<Series>,
   ): Promise<Series> {
-    return this.seriesRepository.findById(id, filter);
+    const foundSeries = await this.seriesRepository.findById(id, filter);
+    const foundMedia: Media | null = await this.mediaRepository.findOne({
+      where: {
+        seriesId: foundSeries.id,
+      },
+    });
+    if (foundMedia) {
+      set(foundSeries, 'media', foundMedia);
+    }
+    return foundSeries;
   }
 
   @patch('/series/{id}')
@@ -153,12 +165,17 @@ export class SeriesController {
     description: 'Series DELETE success',
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
-    await this.seriesRepository.updateById(id, {
-      isDeleted: true,
-    });
-    await this.seriesRepository.books(id).patch({
-      isDeleted: true,
-    });
+    await Promise.all([
+      this.seriesRepository.updateById(id, {
+        isDeleted: true,
+      }),
+      this.seriesRepository.books(id).patch({
+        isDeleted: true,
+      }),
+      this.mediaRepository.deleteAll({
+        seriesId: id,
+      }),
+    ]);
   }
 
   @get('/series/paginate')

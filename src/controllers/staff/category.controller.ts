@@ -18,15 +18,19 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
+import set from 'lodash/set';
 import {EUserRoleEnum} from '../../enums/user';
-import {Category} from '../../models';
-import {CategoryRepository} from '../../repositories';
+import {Category, Media} from '../../models';
+import {CategoryRepository, MediaRepository} from '../../repositories';
+import {getValidArray} from '../../utils/common';
 
 @api({basePath: `/${EUserRoleEnum.STAFF}`})
 export class CategoryController {
   constructor(
     @repository(CategoryRepository)
     public categoryRepository: CategoryRepository,
+    @repository(MediaRepository)
+    public mediaRepository: MediaRepository,
   ) {}
 
   @post('/categories')
@@ -74,7 +78,21 @@ export class CategoryController {
   async find(
     @param.filter(Category) filter?: Filter<Category>,
   ): Promise<Category[]> {
-    return this.categoryRepository.find(filter);
+    const foundCategories: Category[] = await this.categoryRepository.find(
+      filter,
+    );
+    getValidArray(foundCategories).map(async (category: Category) => {
+      const foundMedia: Media | null = await this.mediaRepository.findOne({
+        where: {
+          categoryId: category.id,
+        },
+      });
+      if (foundMedia) {
+        set(category, 'media', foundMedia);
+      }
+      return category;
+    });
+    return foundCategories;
   }
 
   @patch('/categories')
@@ -110,7 +128,16 @@ export class CategoryController {
     @param.filter(Category, {exclude: 'where'})
     filter?: FilterExcludingWhere<Category>,
   ): Promise<Category> {
-    return this.categoryRepository.findById(id, filter);
+    const foundCategory = await this.categoryRepository.findById(id, filter);
+    const foundMedia: Media | null = await this.mediaRepository.findOne({
+      where: {
+        categoryId: foundCategory.id,
+      },
+    });
+    if (foundMedia) {
+      set(foundCategory, 'media', foundMedia);
+    }
+    return foundCategory;
   }
 
   @patch('/categories/{id}')
@@ -150,6 +177,11 @@ export class CategoryController {
     description: 'Category DELETE success',
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
-    await this.categoryRepository.deleteById(id);
+    await Promise.all([
+      this.categoryRepository.deleteById(id),
+      this.mediaRepository.deleteAll({
+        categoryId: id,
+      }),
+    ]);
   }
 }

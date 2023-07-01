@@ -17,6 +17,20 @@ export function getDefaultPipeline(
       },
     },
     {
+      $lookup: {
+        from: 'Media',
+        localField: '_id',
+        foreignField: 'seriesId',
+        as: 'media',
+      },
+    },
+    {
+      $unwind: {
+        path: '$media',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
       $project: {
         id: '$_id',
         _id: '$$REMOVE',
@@ -24,6 +38,7 @@ export function getDefaultPipeline(
         author: '$author',
         releaseDate: '$releaseDate',
         status: '$status',
+        media: '$media',
         description: '$description',
         isDeleted: '$isDeleted',
       },
