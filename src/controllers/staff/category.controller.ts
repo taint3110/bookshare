@@ -20,13 +20,15 @@ import {
 } from '@loopback/rest';
 import {EUserRoleEnum} from '../../enums/user';
 import {Category} from '../../models';
-import {CategoryRepository} from '../../repositories';
+import {CategoryRepository, MediaRepository} from '../../repositories';
 
 @api({basePath: `/${EUserRoleEnum.STAFF}`})
 export class CategoryController {
   constructor(
     @repository(CategoryRepository)
     public categoryRepository: CategoryRepository,
+    @repository(MediaRepository)
+    public mediaRepository: MediaRepository,
   ) {}
 
   @post('/categories')
@@ -128,7 +130,10 @@ export class CategoryController {
     })
     category: Category,
   ): Promise<void> {
-    await this.categoryRepository.updateById(id, category);
+    await this.categoryRepository.updateById(id, {
+      ...category,
+      updatedAt: new Date(),
+    });
   }
 
   @put('/categories/{id}')
@@ -147,6 +152,11 @@ export class CategoryController {
     description: 'Category DELETE success',
   })
   async deleteById(@param.path.string('id') id: string): Promise<void> {
-    await this.categoryRepository.deleteById(id);
+    await Promise.all([
+      this.categoryRepository.deleteById(id),
+      this.mediaRepository.deleteAll({
+        categoryId: id,
+      }),
+    ]);
   }
 }

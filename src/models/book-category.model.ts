@@ -1,30 +1,13 @@
 import {Entity, model, property} from '@loopback/repository';
 
 @model()
-export class Media extends Entity {
+export class BookCategory extends Entity {
   @property({
     type: 'string',
     id: true,
     generated: true,
   })
   id?: string;
-
-  @property({
-    type: 'string',
-    required: true,
-  })
-  fileName: string;
-
-  @property({
-    type: 'string',
-    required: true,
-  })
-  imageUrl?: string;
-
-  @property({
-    type: 'number',
-  })
-  order?: number;
 
   @property({
     type: 'boolean',
@@ -52,20 +35,15 @@ export class Media extends Entity {
   @property({
     type: 'string',
   })
-  seriesId?: string;
-
-  @property({
-    type: 'string',
-  })
   categoryId?: string;
 
-  constructor(data?: Partial<Media>) {
+  constructor(data?: Partial<BookCategory>) {
     super(data);
   }
 }
 
-export interface MediaRelations {
+export interface BookCategoryRelations {
   // describe navigational properties here
 }
 
-export type MediaWithRelations = Media & MediaRelations;
+export type BookCategoryWithRelations = BookCategory & BookCategoryRelations;

@@ -1,9 +1,13 @@
 import {BindingScope, injectable} from '@loopback/core';
 import {Filter, repository} from '@loopback/repository';
-import {Book} from '../models';
+import {Book, BookWithRelations} from '../models';
 import {BookRepository} from '../repositories';
 import {AggregationCount, AggregationPipeline, PaginationList} from '../types';
-import {getDefaultPipeline, getTitleFilterPipeline} from '../utils/book';
+import {
+  getBookDetailPipeline,
+  getDefaultPipeline,
+  getTitleFilterPipeline,
+} from '../utils/book';
 
 @injectable({scope: BindingScope.TRANSIENT})
 export class BookService {
@@ -14,24 +18,14 @@ export class BookService {
 
   async paginate(filter?: Filter<Book>): Promise<PaginationList<Book>> {
     const pipeline: AggregationPipeline = getDefaultPipeline(filter);
+    const titleQuery: AggregationPipeline | null =
+      getTitleFilterPipeline(filter);
     const countPipeline: AggregationPipeline = [
-      {
-        $match: {
-          isDeleted: {
-            $ne: true,
-          },
-        },
-      },
+      ...pipeline,
       {
         $count: 'totalCount',
       },
     ];
-    const titleQuery: AggregationPipeline | null =
-      getTitleFilterPipeline(filter);
-    if (titleQuery) {
-      pipeline.unshift(...titleQuery);
-      countPipeline.unshift(...titleQuery);
-    }
     const skip = filter?.skip ?? filter?.offset;
     if (skip) {
       pipeline.push({
@@ -42,6 +36,10 @@ export class BookService {
       pipeline.push({
         $limit: filter?.limit,
       });
+    }
+    if (titleQuery) {
+      pipeline.unshift(...titleQuery);
+      countPipeline.unshift(...titleQuery);
     }
     const bookCollection =
       this.bookRepository.dataSource?.connector?.collection(
@@ -60,15 +58,15 @@ export class BookService {
   }
 
   //*INFO: May use later
-  // async getDetails(buildiumUnitId: number): Promise<UnitWithRelations> {
-  //   const pipeline: AggregationPipeline = getRoomDetailPipeline(buildiumUnitId);
-  //   const unitCollection =
-  //     this.bookRepository.dataSource?.connector?.collection(
-  //       this.bookRepository?.modelClass?.name,
-  //     );
-  //   const [result] = (await unitCollection.aggregate(pipeline).get()) as [
-  //     UnitWithRelations,
-  //   ];
-  //   return result;
-  // }
+  async getDetails(bookId: string): Promise<BookWithRelations> {
+    const pipeline: AggregationPipeline = getBookDetailPipeline(bookId);
+    const bookCollection =
+      this.bookRepository.dataSource?.connector?.collection(
+        this.bookRepository?.modelClass?.name,
+      );
+    const [result] = (await bookCollection.aggregate(pipeline).get()) as [
+      BookWithRelations,
+    ];
+    return result;
+  }
 }

@@ -17,22 +17,22 @@ import {
 } from '@loopback/rest';
 import {
   Book,
-  Category,
+  BookCategory,
 } from '../models';
 import {BookRepository} from '../repositories';
 
-export class BookCategoryController {
+export class BookBookCategoryController {
   constructor(
     @repository(BookRepository) protected bookRepository: BookRepository,
   ) { }
 
-  @get('/books/{id}/categories', {
+  @get('/books/{id}/book-categories', {
     responses: {
       '200': {
-        description: 'Array of Book has many Category',
+        description: 'Array of Book has many BookCategory',
         content: {
           'application/json': {
-            schema: {type: 'array', items: getModelSchemaRef(Category)},
+            schema: {type: 'array', items: getModelSchemaRef(BookCategory)},
           },
         },
       },
@@ -40,16 +40,16 @@ export class BookCategoryController {
   })
   async find(
     @param.path.string('id') id: string,
-    @param.query.object('filter') filter?: Filter<Category>,
-  ): Promise<Category[]> {
-    return this.bookRepository.categories(id).find(filter);
+    @param.query.object('filter') filter?: Filter<BookCategory>,
+  ): Promise<BookCategory[]> {
+    return this.bookRepository.bookCategories(id).find(filter);
   }
 
-  @post('/books/{id}/categories', {
+  @post('/books/{id}/book-categories', {
     responses: {
       '200': {
         description: 'Book model instance',
-        content: {'application/json': {schema: getModelSchemaRef(Category)}},
+        content: {'application/json': {schema: getModelSchemaRef(BookCategory)}},
       },
     },
   })
@@ -58,22 +58,22 @@ export class BookCategoryController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Category, {
-            title: 'NewCategoryInBook',
+          schema: getModelSchemaRef(BookCategory, {
+            title: 'NewBookCategoryInBook',
             exclude: ['id'],
             optional: ['bookId']
           }),
         },
       },
-    }) category: Omit<Category, 'id'>,
-  ): Promise<Category> {
-    return this.bookRepository.categories(id).create(category);
+    }) bookCategory: Omit<BookCategory, 'id'>,
+  ): Promise<BookCategory> {
+    return this.bookRepository.bookCategories(id).create(bookCategory);
   }
 
-  @patch('/books/{id}/categories', {
+  @patch('/books/{id}/book-categories', {
     responses: {
       '200': {
-        description: 'Book.Category PATCH success count',
+        description: 'Book.BookCategory PATCH success count',
         content: {'application/json': {schema: CountSchema}},
       },
     },
@@ -83,28 +83,28 @@ export class BookCategoryController {
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Category, {partial: true}),
+          schema: getModelSchemaRef(BookCategory, {partial: true}),
         },
       },
     })
-    category: Partial<Category>,
-    @param.query.object('where', getWhereSchemaFor(Category)) where?: Where<Category>,
+    bookCategory: Partial<BookCategory>,
+    @param.query.object('where', getWhereSchemaFor(BookCategory)) where?: Where<BookCategory>,
   ): Promise<Count> {
-    return this.bookRepository.categories(id).patch(category, where);
+    return this.bookRepository.bookCategories(id).patch(bookCategory, where);
   }
 
-  @del('/books/{id}/categories', {
+  @del('/books/{id}/book-categories', {
     responses: {
       '200': {
-        description: 'Book.Category DELETE success count',
+        description: 'Book.BookCategory DELETE success count',
         content: {'application/json': {schema: CountSchema}},
       },
     },
   })
   async delete(
     @param.path.string('id') id: string,
-    @param.query.object('where', getWhereSchemaFor(Category)) where?: Where<Category>,
+    @param.query.object('where', getWhereSchemaFor(BookCategory)) where?: Where<BookCategory>,
   ): Promise<Count> {
-    return this.bookRepository.categories(id).delete(where);
+    return this.bookRepository.bookCategories(id).delete(where);
   }
 }

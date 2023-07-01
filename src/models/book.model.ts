@@ -1,12 +1,17 @@
-import {Entity, model, property, belongsTo, hasMany} from '@loopback/repository';
+import {
+  Entity,
+  belongsTo,
+  hasMany,
+  model,
+  property, hasOne} from '@loopback/repository';
 import {
   EBookConditionEnum,
   EBookCoverEnum,
   EBookStatusEnum,
 } from '../enums/book';
-import {Series} from './series.model';
-import {Category} from './category.model';
 import {Media} from './media.model';
+import {Series} from './series.model';
+import {BookCategory} from './book-category.model';
 
 @model()
 export class Book extends Entity {
@@ -120,7 +125,7 @@ export class Book extends Entity {
     type: 'date',
     default: new Date(),
   })
-  updatedAt?: string;
+  updatedAt?: Date;
 
   @belongsTo(() => Series)
   seriesId: string;
@@ -130,11 +135,11 @@ export class Book extends Entity {
   })
   orderId?: string;
 
-  @hasMany(() => Category)
-  categories: Category[];
+  @hasMany(() => BookCategory)
+  bookCategories: BookCategory[];
 
-  @hasMany(() => Media)
-  media: Media[];
+  @hasOne(() => Media)
+  media: Media;
 
   constructor(data?: Partial<Book>) {
     super(data);
@@ -142,7 +147,9 @@ export class Book extends Entity {
 }
 
 export interface BookRelations {
-  // describe navigational properties here
+  series?: Series;
+  media?: Media;
+  bookCategories?: BookCategory[];
 }
 
 export type BookWithRelations = Book & BookRelations;
