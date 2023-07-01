@@ -58,7 +58,7 @@ export class MediaController {
         return this.mediaRepository.create(omit(media, 'id'));
       }
     }
-    return this.mediaRepository.create(media);
+    return this.mediaRepository.create(omit(media, 'id'));
   }
 
   @get('/media/count')

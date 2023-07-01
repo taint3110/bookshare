@@ -18,11 +18,9 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
-import set from 'lodash/set';
 import {EUserRoleEnum} from '../../enums/user';
-import {Category, Media} from '../../models';
+import {Category} from '../../models';
 import {CategoryRepository, MediaRepository} from '../../repositories';
-import {getValidArray} from '../../utils/common';
 
 @api({basePath: `/${EUserRoleEnum.STAFF}`})
 export class CategoryController {
@@ -78,21 +76,7 @@ export class CategoryController {
   async find(
     @param.filter(Category) filter?: Filter<Category>,
   ): Promise<Category[]> {
-    const foundCategories: Category[] = await this.categoryRepository.find(
-      filter,
-    );
-    getValidArray(foundCategories).map(async (category: Category) => {
-      const foundMedia: Media | null = await this.mediaRepository.findOne({
-        where: {
-          categoryId: category.id,
-        },
-      });
-      if (foundMedia) {
-        set(category, 'media', foundMedia);
-      }
-      return category;
-    });
-    return foundCategories;
+    return this.categoryRepository.find(filter);
   }
 
   @patch('/categories')
@@ -128,16 +112,7 @@ export class CategoryController {
     @param.filter(Category, {exclude: 'where'})
     filter?: FilterExcludingWhere<Category>,
   ): Promise<Category> {
-    const foundCategory = await this.categoryRepository.findById(id, filter);
-    const foundMedia: Media | null = await this.mediaRepository.findOne({
-      where: {
-        categoryId: foundCategory.id,
-      },
-    });
-    if (foundMedia) {
-      set(foundCategory, 'media', foundMedia);
-    }
-    return foundCategory;
+    return this.categoryRepository.findById(id, filter);
   }
 
   @patch('/categories/{id}')
