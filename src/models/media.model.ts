@@ -54,6 +54,11 @@ export class Media extends Entity {
   })
   seriesId?: string;
 
+  @property({
+    type: 'string',
+  })
+  categoryId?: string;
+
   constructor(data?: Partial<Media>) {
     super(data);
   }

@@ -3,8 +3,7 @@ import {
   belongsTo,
   hasMany,
   model,
-  property,
-} from '@loopback/repository';
+  property, hasOne} from '@loopback/repository';
 import {
   EBookConditionEnum,
   EBookCoverEnum,
@@ -136,11 +135,11 @@ export class Book extends Entity {
   })
   orderId?: string;
 
-  @hasMany(() => Media)
-  media: Media[];
-
   @hasMany(() => BookCategory)
   bookCategories: BookCategory[];
+
+  @hasOne(() => Media)
+  media: Media;
 
   constructor(data?: Partial<Book>) {
     super(data);
@@ -149,7 +148,7 @@ export class Book extends Entity {
 
 export interface BookRelations {
   series?: Series;
-  media?: Media[];
+  media?: Media;
   bookCategories?: BookCategory[];
 }
 

@@ -18,6 +18,7 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
+import omit from 'lodash/omit';
 import {EUserRoleEnum} from '../../enums/user';
 import {Media} from '../../models';
 import {MediaRepository} from '../../repositories';
@@ -40,13 +41,23 @@ export class MediaController {
         'application/json': {
           schema: getModelSchemaRef(Media, {
             title: 'NewMedia',
-            exclude: ['id'],
           }),
         },
       },
     })
-    media: Omit<Media, 'id'>,
+    media: Media,
   ): Promise<Media> {
+    if (media?.id) {
+      const foundMedia: Media | null = await this.mediaRepository.findById(
+        media.id,
+      );
+      if (foundMedia) {
+        await this.mediaRepository.updateById(media.id, media);
+        return this.mediaRepository.findById(media.id);
+      } else {
+        return this.mediaRepository.create(omit(media, 'id'));
+      }
+    }
     return this.mediaRepository.create(media);
   }
 

@@ -29,20 +29,20 @@ export class BookMediaController {
   @get('/books/{id}/media', {
     responses: {
       '200': {
-        description: 'Array of Book has many Media',
+        description: 'Book has one Media',
         content: {
           'application/json': {
-            schema: {type: 'array', items: getModelSchemaRef(Media)},
+            schema: getModelSchemaRef(Media),
           },
         },
       },
     },
   })
-  async find(
+  async get(
     @param.path.string('id') id: string,
     @param.query.object('filter') filter?: Filter<Media>,
-  ): Promise<Media[]> {
-    return this.bookRepository.media(id).find(filter);
+  ): Promise<Media> {
+    return this.bookRepository.media(id).get(filter);
   }
 
   @post('/books/{id}/media', {

@@ -20,7 +20,7 @@ entity "Book" as book {
   releaseDate?: Date
   publisher?: string
   language?: string
-  media?: Media[]
+  media?: Media
   bookCover?: EBookCoverEnum
   ' enum EBookCoverEnum {
   '   SOFT = 'soft',
@@ -58,7 +58,7 @@ entity "Series" as series {
   *title: string
   description?: string
   releaseDate?: Date
-  media?: Media[]
+  media?: Media
   books?: Book[]
   isDeleted?: boolean
   createdAt?: Date
@@ -84,6 +84,7 @@ entity "Media" as media {
   --
   bookId?: ObjectID
   categoryId?: ObjectID
+  seriesId?: ObjectID
   createdBy?: ObjectID
   updatedBy?: ObjectID
   --
@@ -164,7 +165,7 @@ entity "Comment" as comment {
   ' }
   likeCount?: number
   dislikeCount?: number
-  media?: Media[]
+  media?: Media
   isDeleted?: boolean
   createdAt?: Date
   updatedAt?: Date

@@ -1,5 +1,6 @@
-import {Entity, model, property, hasMany} from '@loopback/repository';
+import {Entity, model, property, hasMany, hasOne} from '@loopback/repository';
 import {BookCategory} from './book-category.model';
+import {Media} from './media.model';
 
 @model()
 export class Category extends Entity {
@@ -41,6 +42,9 @@ export class Category extends Entity {
 
   @hasMany(() => BookCategory)
   bookCategories: BookCategory[];
+
+  @hasOne(() => Media)
+  media: Media;
 
   constructor(data?: Partial<Category>) {
     super(data);

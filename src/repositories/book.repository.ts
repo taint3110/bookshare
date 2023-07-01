@@ -3,13 +3,14 @@ import {
   BelongsToAccessor,
   DefaultCrudRepository,
   HasManyRepositoryFactory,
+  HasOneRepositoryFactory,
   repository,
 } from '@loopback/repository';
 import {MongodbDataSource} from '../datasources';
-import {Book, BookRelations, Media, Series, BookCategory} from '../models';
+import {Book, BookCategory, BookRelations, Media, Series} from '../models';
+import {BookCategoryRepository} from './book-category.repository';
 import {MediaRepository} from './media.repository';
 import {SeriesRepository} from './series.repository';
-import {BookCategoryRepository} from './book-category.repository';
 
 export class BookRepository extends DefaultCrudRepository<
   Book,
@@ -18,28 +19,39 @@ export class BookRepository extends DefaultCrudRepository<
 > {
   public readonly series: BelongsToAccessor<Series, typeof Book.prototype.id>;
 
-  public readonly media: HasManyRepositoryFactory<
-    Media,
+  public readonly bookCategories: HasManyRepositoryFactory<
+    BookCategory,
     typeof Book.prototype.id
   >;
 
-  public readonly bookCategories: HasManyRepositoryFactory<BookCategory, typeof Book.prototype.id>;
+  public readonly media: HasOneRepositoryFactory<
+    Media,
+    typeof Book.prototype.id
+  >;
 
   constructor(
     @inject('datasources.mongodb') dataSource: MongodbDataSource,
     @repository.getter('SeriesRepository')
     protected seriesRepositoryGetter: Getter<SeriesRepository>,
+    @repository.getter('BookCategoryRepository')
+    protected bookCategoryRepositoryGetter: Getter<BookCategoryRepository>,
     @repository.getter('MediaRepository')
-    protected mediaRepositoryGetter: Getter<MediaRepository>, @repository.getter('BookCategoryRepository') protected bookCategoryRepositoryGetter: Getter<BookCategoryRepository>,
+    protected mediaRepositoryGetter: Getter<MediaRepository>,
   ) {
     super(Book, dataSource);
-    this.bookCategories = this.createHasManyRepositoryFactoryFor('bookCategories', bookCategoryRepositoryGetter,);
-    this.registerInclusionResolver('bookCategories', this.bookCategories.inclusionResolver);
-    this.media = this.createHasManyRepositoryFactoryFor(
+    this.media = this.createHasOneRepositoryFactoryFor(
       'media',
       mediaRepositoryGetter,
     );
     this.registerInclusionResolver('media', this.media.inclusionResolver);
+    this.bookCategories = this.createHasManyRepositoryFactoryFor(
+      'bookCategories',
+      bookCategoryRepositoryGetter,
+    );
+    this.registerInclusionResolver(
+      'bookCategories',
+      this.bookCategories.inclusionResolver,
+    );
     this.series = this.createBelongsToAccessorFor(
       'series',
       seriesRepositoryGetter,
