@@ -147,4 +147,21 @@ export class OrderController {
   async deleteById(@param.path.string('id') id: string): Promise<void> {
     await this.orderRepository.deleteById(id);
   }
+
+  @get('/orders/paginate')
+  @response(200, {
+    description: 'Array of Boook model instances',
+    content: {
+      'application/json': {
+        schema: {
+          type: 'object',
+        },
+      },
+    },
+  })
+  async paginate(
+    @param.filter(Order) filter?: Filter<Order>,
+  ): Promise<PaginationList<Book>> {
+    return this.bookService.paginate(filter);
+  }
 }
