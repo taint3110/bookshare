@@ -1,11 +1,13 @@
 import {Filter} from '@loopback/repository';
 import get from 'lodash/get';
 import trim from 'lodash/trim';
-import {Book} from '../models';
+import {Order} from '../models';
 import {AggregationPipeline} from '../types';
 import {convertLoopbackFilterOrderToMongoAggregationSort} from './filter';
 
-export function getDefaultPipeline(filter?: Filter<Book>): AggregationPipeline {
+export function getDefaultPipeline(
+  filter?: Filter<Order>,
+): AggregationPipeline {
   return [
     {
       $match: {
@@ -25,7 +27,7 @@ export function getDefaultPipeline(filter?: Filter<Book>): AggregationPipeline {
             $match: {
               $expr: {
                 $and: [
-                  {$ne: ['$isDeleted', false]},
+                  {$ne: ['$isDeleted', true]},
                   {
                     $eq: ['$orderId', '$$orderId'],
                   },
@@ -34,17 +36,110 @@ export function getDefaultPipeline(filter?: Filter<Book>): AggregationPipeline {
             },
           },
           {
-            $addFields: {
-              id: {
-                $toString: '$_id',
+            $lookup: {
+              from: 'Media',
+              localField: '_id',
+              foreignField: 'bookId',
+              as: 'media',
+            },
+          },
+          {
+            $unwind: {
+              path: '$media',
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $lookup: {
+              from: 'Series',
+              localField: 'seriesId',
+              foreignField: '_id',
+              as: 'series',
+            },
+          },
+          {
+            $unwind: {
+              path: '$series',
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $lookup: {
+              from: 'BookCategory',
+              localField: '_id',
+              foreignField: 'bookId',
+              as: 'bookCategories',
+            },
+          },
+          {
+            $unwind: {
+              path: '$bookCategories',
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $lookup: {
+              from: 'Category',
+              localField: 'bookCategories.categoryId',
+              foreignField: '_id',
+              as: 'bookCategoryList',
+            },
+          },
+          {
+            $unwind: {
+              path: '$bookCategoryList',
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $group: {
+              _id: '$_id',
+              bookCategoryList: {
+                $push: '$bookCategoryList',
+              },
+              data: {$first: '$$ROOT'},
+            },
+          },
+          {
+            $replaceRoot: {
+              newRoot: {
+                $mergeObjects: [
+                  '$data',
+                  {bookCategoryList: '$bookCategoryList'},
+                ],
               },
             },
           },
           {
-            $unset: '_id',
+            $project: {
+              id: '$_id',
+              _id: '$$REMOVE',
+              title: '$title',
+              author: '$author',
+              price: '$price',
+              bookStatus: '$bookStatus',
+              series: '$series',
+              categories: '$bookCategoryList',
+              description: '$description',
+              bonusPointPrice: '$bonusPointPrice',
+              releaseDate: '$releaseDate',
+              publisher: '$publisher',
+              language: '$language',
+              media: '$media',
+              bookCover: '$bookCover',
+              bookCondition: '$bookCondition',
+              isbn: '$isbn',
+              discount: '$discount',
+              rentCount: '$rentCount',
+              availableStartDate: '$availableStartDate',
+              availableEndDate: '$availableEndDate',
+              isDeleted: '$isDeleted',
+              createdAt: '$createdAt',
+              updatedAt: '$updatedAt',
+            },
           },
         ],
-        as: 'media',
+        as: 'book',
       },
     },
     {
@@ -62,75 +157,16 @@ export function getDefaultPipeline(filter?: Filter<Book>): AggregationPipeline {
       },
     },
     {
-      $lookup: {
-        from: 'BookCategory',
-        localField: '_id',
-        foreignField: 'bookId',
-        as: 'bookCategories',
-      },
-    },
-    {
-      $unwind: {
-        path: '$bookCategories',
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $lookup: {
-        from: 'Category',
-        localField: 'bookCategories.categoryId',
-        foreignField: '_id',
-        as: 'bookCategoryList',
-      },
-    },
-    {
-      $unwind: {
-        path: '$bookCategoryList',
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $group: {
-        _id: '$_id',
-        bookCategoryList: {
-          $push: '$bookCategoryList',
-        },
-        data: {$first: '$$ROOT'},
-      },
-    },
-    {
-      $replaceRoot: {
-        newRoot: {
-          $mergeObjects: ['$data', {bookCategoryList: '$bookCategoryList'}],
-        },
-      },
-    },
-    {
       $project: {
         id: '$_id',
         _id: '$$REMOVE',
-        title: '$title',
-        author: '$author',
-        price: '$price',
-        bookStatus: '$bookStatus',
-        series: '$series',
-        categories: '$bookCategoryList',
+        rentLength: '$rentLength',
+        orderStatus: '$orderStatus',
         description: '$description',
-        bonusPointPrice: '$bonusPointPrice',
-        releaseDate: '$releaseDate',
-        publisher: '$publisher',
-        language: '$language',
-        media: '$media',
-        bookCover: '$bookCover',
-        bookCondition: '$bookCondition',
-        isbn: '$isbn',
-        discount: '$discount',
-        rentCount: '$rentCount',
-        availableStartDate: '$availableStartDate',
-        availableEndDate: '$availableEndDate',
         isDeleted: '$isDeleted',
         createdAt: '$createdAt',
         updatedAt: '$updatedAt',
+        bookList: '$book',
       },
     },
     {
@@ -144,7 +180,7 @@ export function getDefaultPipeline(filter?: Filter<Book>): AggregationPipeline {
 }
 
 export function getTitleFilterPipeline(
-  filter?: Filter<Book>,
+  filter?: Filter<Order>,
 ): AggregationPipeline | null {
   const titleFilter = String(get(filter, 'where.title', ''));
   if (titleFilter) {
@@ -176,7 +212,7 @@ export function getTitleFilterPipeline(
   return null;
 }
 
-export function getBookDetailPipeline(bookId: string): AggregationPipeline {
+export function getBookDetailPipeline(orderId: string): AggregationPipeline {
   return [
     {
       $addFields: {
@@ -191,22 +227,134 @@ export function getBookDetailPipeline(bookId: string): AggregationPipeline {
           $ne: true,
         },
         idToString: {
-          $eq: String(bookId),
+          $eq: String(orderId),
         },
       },
     },
     {
       $lookup: {
-        from: 'Media',
-        localField: '_id',
-        foreignField: 'bookId',
-        as: 'media',
-      },
-    },
-    {
-      $unwind: {
-        path: '$media',
-        preserveNullAndEmptyArrays: true,
+        from: 'Book',
+        let: {
+          orderId: '$_id',
+        },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  {$ne: ['$isDeleted', true]},
+                  {
+                    $eq: ['$orderId', '$$orderId'],
+                  },
+                ],
+              },
+            },
+          },
+          {
+            $lookup: {
+              from: 'Media',
+              localField: '_id',
+              foreignField: 'bookId',
+              as: 'media',
+            },
+          },
+          {
+            $unwind: {
+              path: '$media',
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $lookup: {
+              from: 'Series',
+              localField: 'seriesId',
+              foreignField: '_id',
+              as: 'series',
+            },
+          },
+          {
+            $unwind: {
+              path: '$series',
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $lookup: {
+              from: 'BookCategory',
+              localField: '_id',
+              foreignField: 'bookId',
+              as: 'bookCategories',
+            },
+          },
+          {
+            $unwind: {
+              path: '$bookCategories',
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $lookup: {
+              from: 'Category',
+              localField: 'bookCategories.categoryId',
+              foreignField: '_id',
+              as: 'bookCategoryList',
+            },
+          },
+          {
+            $unwind: {
+              path: '$bookCategoryList',
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $group: {
+              _id: '$_id',
+              bookCategoryList: {
+                $push: '$bookCategoryList',
+              },
+              data: {$first: '$$ROOT'},
+            },
+          },
+          {
+            $replaceRoot: {
+              newRoot: {
+                $mergeObjects: [
+                  '$data',
+                  {bookCategoryList: '$bookCategoryList'},
+                ],
+              },
+            },
+          },
+          {
+            $project: {
+              id: '$_id',
+              _id: '$$REMOVE',
+              title: '$title',
+              author: '$author',
+              price: '$price',
+              bookStatus: '$bookStatus',
+              series: '$series',
+              categories: '$bookCategoryList',
+              description: '$description',
+              bonusPointPrice: '$bonusPointPrice',
+              releaseDate: '$releaseDate',
+              publisher: '$publisher',
+              language: '$language',
+              media: '$media',
+              bookCover: '$bookCover',
+              bookCondition: '$bookCondition',
+              isbn: '$isbn',
+              discount: '$discount',
+              rentCount: '$rentCount',
+              availableStartDate: '$availableStartDate',
+              availableEndDate: '$availableEndDate',
+              isDeleted: '$isDeleted',
+              createdAt: '$createdAt',
+              updatedAt: '$updatedAt',
+            },
+          },
+        ],
+        as: 'book',
       },
     },
     {
@@ -224,75 +372,16 @@ export function getBookDetailPipeline(bookId: string): AggregationPipeline {
       },
     },
     {
-      $lookup: {
-        from: 'BookCategory',
-        localField: '_id',
-        foreignField: 'bookId',
-        as: 'bookCategories',
-      },
-    },
-    {
-      $unwind: {
-        path: '$bookCategories',
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $lookup: {
-        from: 'Category',
-        localField: 'bookCategories.categoryId',
-        foreignField: '_id',
-        as: 'bookCategoryList',
-      },
-    },
-    {
-      $unwind: {
-        path: '$bookCategoryList',
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $group: {
-        _id: '$_id',
-        bookCategoryList: {
-          $push: '$bookCategoryList',
-        },
-        data: {$first: '$$ROOT'},
-      },
-    },
-    {
-      $replaceRoot: {
-        newRoot: {
-          $mergeObjects: ['$data', {bookCategoryList: '$bookCategoryList'}],
-        },
-      },
-    },
-    {
       $project: {
         id: '$_id',
         _id: '$$REMOVE',
-        title: '$title',
-        author: '$author',
-        price: '$price',
-        bookStatus: '$bookStatus',
-        series: '$series',
-        categories: '$bookCategoryList',
+        rentLength: '$rentLength',
+        orderStatus: '$orderStatus',
         description: '$description',
-        bonusPointPrice: '$bonusPointPrice',
-        releaseDate: '$releaseDate',
-        publisher: '$publisher',
-        language: '$language',
-        media: '$media',
-        bookCover: '$bookCover',
-        bookCondition: '$bookCondition',
-        isbn: '$isbn',
-        discount: '$discount',
-        rentCount: '$rentCount',
-        availableStartDate: '$availableStartDate',
-        availableEndDate: '$availableEndDate',
         isDeleted: '$isDeleted',
         createdAt: '$createdAt',
         updatedAt: '$updatedAt',
+        bookList: '$book',
       },
     },
   ];

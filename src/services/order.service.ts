@@ -1,22 +1,22 @@
 import {BindingScope, injectable} from '@loopback/core';
 import {Filter, repository} from '@loopback/repository';
-import {Book, BookWithRelations} from '../models';
-import {BookRepository} from '../repositories';
+import {Order} from '../models';
+import {OrderRepository} from '../repositories';
 import {AggregationCount, AggregationPipeline, PaginationList} from '../types';
 import {
   getBookDetailPipeline,
   getDefaultPipeline,
   getTitleFilterPipeline,
-} from '../utils/book';
+} from '../utils/order';
 
 @injectable({scope: BindingScope.TRANSIENT})
-export class BookService {
+export class OrderService {
   constructor(
-    @repository(BookRepository)
-    public bookRepository: BookRepository,
+    @repository(OrderRepository)
+    public orderRepository: OrderRepository,
   ) {}
 
-  async paginate(filter?: Filter<Book>): Promise<PaginationList<Book>> {
+  async paginate(filter?: Filter<Order>): Promise<PaginationList<Order>> {
     const pipeline: AggregationPipeline = getDefaultPipeline(filter);
     const titleQuery: AggregationPipeline | null =
       getTitleFilterPipeline(filter);
@@ -42,29 +42,29 @@ export class BookService {
       countPipeline.unshift(...titleQuery);
     }
     const bookCollection =
-      this.bookRepository.dataSource?.connector?.collection(
-        this.bookRepository?.modelClass?.name,
+      this.orderRepository.dataSource?.connector?.collection(
+        this.orderRepository?.modelClass?.name,
       );
     const [results, countResponse] = (await Promise.all([
       bookCollection.aggregate(pipeline).get(),
       bookCollection.aggregate(countPipeline).get(),
-    ])) as [Book[], [AggregationCount]];
+    ])) as [Order[], [AggregationCount]];
 
     return {results, totalCount: countResponse[0]?.totalCount};
   }
 
   async deleteById(id: string): Promise<void> {
-    await this.bookRepository.deleteById(id);
+    await this.orderRepository.deleteById(id);
   }
 
-  async getDetails(bookId: string): Promise<BookWithRelations> {
-    const pipeline: AggregationPipeline = getBookDetailPipeline(bookId);
+  async getDetails(orderId: string): Promise<Order> {
+    const pipeline: AggregationPipeline = getBookDetailPipeline(orderId);
     const bookCollection =
-      this.bookRepository.dataSource?.connector?.collection(
-        this.bookRepository?.modelClass?.name,
+      this.orderRepository.dataSource?.connector?.collection(
+        this.orderRepository?.modelClass?.name,
       );
     const [result] = (await bookCollection.aggregate(pipeline).get()) as [
-      BookWithRelations,
+      Order,
     ];
     return result;
   }

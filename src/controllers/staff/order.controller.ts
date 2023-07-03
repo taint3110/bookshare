@@ -1,8 +1,8 @@
+import {service} from '@loopback/core';
 import {
   Count,
   CountSchema,
   Filter,
-  FilterExcludingWhere,
   repository,
   Where,
 } from '@loopback/repository';
@@ -21,12 +21,16 @@ import {
 import {EUserRoleEnum} from '../../enums/user';
 import {Order} from '../../models';
 import {OrderRepository} from '../../repositories';
+import {OrderService} from '../../services';
+import {PaginationList} from '../../types';
 
 @api({basePath: `/${EUserRoleEnum.STAFF}`})
 export class OrderController {
   constructor(
     @repository(OrderRepository)
     public orderRepository: OrderRepository,
+    @service(OrderService)
+    public orderService: OrderService,
   ) {}
 
   @post('/orders')
@@ -103,12 +107,8 @@ export class OrderController {
       },
     },
   })
-  async findById(
-    @param.path.string('id') id: string,
-    @param.filter(Order, {exclude: 'where'})
-    filter?: FilterExcludingWhere<Order>,
-  ): Promise<Order> {
-    return this.orderRepository.findById(id, filter);
+  async findById(@param.path.string('id') id: string): Promise<Order> {
+    return this.orderService.getDetails(id);
   }
 
   @patch('/orders/{id}')
@@ -161,7 +161,7 @@ export class OrderController {
   })
   async paginate(
     @param.filter(Order) filter?: Filter<Order>,
-  ): Promise<PaginationList<Book>> {
-    return this.bookService.paginate(filter);
+  ): Promise<PaginationList<Order>> {
+    return this.orderService.paginate(filter);
   }
 }
