@@ -167,6 +167,7 @@ export function getDefaultPipeline(
         createdAt: '$createdAt',
         updatedAt: '$updatedAt',
         bookList: '$book',
+        totalPrice: '$totalPrice',
       },
     },
     {
@@ -382,6 +383,7 @@ export function getBookDetailPipeline(orderId: string): AggregationPipeline {
         createdAt: '$createdAt',
         updatedAt: '$updatedAt',
         bookList: '$book',
+        totalPrice: '$totalPrice',
       },
     },
   ];
