@@ -9,14 +9,21 @@ export class OrderRepository extends DefaultCrudRepository<
   typeof Order.prototype.id,
   OrderRelations
 > {
-
-  public readonly books: HasManyRepositoryFactory<Book, typeof Order.prototype.id>;
+  public readonly bookList: HasManyRepositoryFactory<
+    Book,
+    typeof Order.prototype.id
+  >;
 
   constructor(
-    @inject('datasources.mongodb') dataSource: MongodbDataSource, @repository.getter('BookRepository') protected bookRepositoryGetter: Getter<BookRepository>,
+    @inject('datasources.mongodb') dataSource: MongodbDataSource,
+    @repository.getter('BookRepository')
+    protected bookRepositoryGetter: Getter<BookRepository>,
   ) {
     super(Order, dataSource);
-    this.books = this.createHasManyRepositoryFactoryFor('books', bookRepositoryGetter,);
-    this.registerInclusionResolver('books', this.books.inclusionResolver);
+    this.bookList = this.createHasManyRepositoryFactoryFor(
+      'bookList',
+      bookRepositoryGetter,
+    );
+    this.registerInclusionResolver('bookList', this.bookList.inclusionResolver);
   }
 }
