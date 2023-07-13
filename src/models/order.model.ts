@@ -53,7 +53,7 @@ export class Order extends Entity {
   updatedAt?: Date;
 
   @hasMany(() => Book)
-  books: Book[];
+  bookList?: Book[];
 
   @property({
     type: 'string',
