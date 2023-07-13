@@ -25,7 +25,7 @@ import {OrderService} from '../../services';
 import {PaginationList} from '../../types';
 
 @api({basePath: `/${EUserRoleEnum.STAFF}`})
-export class OrderController {
+export class StaffOrderController {
   constructor(
     @repository(OrderRepository)
     public orderRepository: OrderRepository,
