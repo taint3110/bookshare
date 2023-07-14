@@ -18,7 +18,7 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
-import {EUserRoleEnum} from '../../enums/user';
+import {EAccountType} from '../../enums/user';
 import {Book, BookWithRelations} from '../../models';
 import {
   BookCategoryRepository,
@@ -29,7 +29,7 @@ import {BookService} from '../../services';
 import {PaginationList} from '../../types';
 import {getValidArray} from '../../utils/common';
 
-@api({basePath: `/${EUserRoleEnum.STAFF}`})
+@api({basePath: `/${EAccountType.STAFF}`})
 export class BookController {
   constructor(
     @repository(BookRepository)

@@ -18,13 +18,13 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
-import {EUserRoleEnum} from '../../enums/user';
+import {EAccountType} from '../../enums/user';
 import {Order} from '../../models';
 import {OrderRepository} from '../../repositories';
 import {OrderService} from '../../services';
 import {PaginationList} from '../../types';
 
-@api({basePath: `/${EUserRoleEnum.STAFF}`})
+@api({basePath: `/${EAccountType.STAFF}`})
 export class StaffOrderController {
   constructor(
     @repository(OrderRepository)
