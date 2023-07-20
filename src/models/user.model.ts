@@ -1,8 +1,22 @@
-import {Entity, model, property, hasMany} from '@loopback/repository';
-import {EUserRoleEnum} from '../enums/user';
+import {Entity, hasMany, hasOne, model, property} from '@loopback/repository';
+import {EAccountType, EUserRoleEnum} from '../enums/user';
 import {Order} from './order.model';
+import {UserCredentials} from './user-credentials.model';
 
-@model()
+@model({
+  settings: {
+    indexes: {
+      uniqueEmail: {
+        keys: {
+          email: 1,
+        },
+        options: {
+          unique: true,
+        },
+      },
+    },
+  },
+})
 export class User extends Entity {
   @property({
     type: 'string',
@@ -19,9 +33,14 @@ export class User extends Entity {
 
   @property({
     type: 'string',
-    required: true,
   })
   password: string;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
+  name: string;
 
   @property({
     type: 'string',
@@ -30,6 +49,17 @@ export class User extends Entity {
     },
   })
   role: EUserRoleEnum;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
+  accountType: EAccountType;
+
+  @property({
+    type: 'string',
+  })
+  avatarUrl?: string;
 
   @property({
     type: 'array',
@@ -53,9 +83,25 @@ export class User extends Entity {
   dateOfBirth?: string;
 
   @property({
-    type: 'number',
+    type: 'boolean',
+    default: false,
   })
-  phoneNumber?: number;
+  isActive?: boolean;
+
+  @property({
+    type: 'string',
+  })
+  phoneNumber?: string;
+
+  @property({
+    type: 'string',
+  })
+  forgotPassword?: string;
+
+  @property({
+    type: 'string',
+  })
+  resetPasswordToken: string;
 
   @property({
     type: 'number',
@@ -67,6 +113,12 @@ export class User extends Entity {
     default: false,
   })
   isDeleted?: boolean;
+
+  @property({
+    type: 'date',
+    default: () => new Date(),
+  })
+  lastSignInAt: Date;
 
   @property({
     type: 'date',
@@ -82,6 +134,9 @@ export class User extends Entity {
 
   @hasMany(() => Order)
   orders: Order[];
+
+  @hasOne(() => UserCredentials)
+  userCredentials: UserCredentials;
 
   constructor(data?: Partial<User>) {
     super(data);

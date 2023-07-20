@@ -19,11 +19,11 @@ import {
   response,
 } from '@loopback/rest';
 import omit from 'lodash/omit';
-import {EUserRoleEnum} from '../../enums/user';
+import {EAccountType} from '../../enums/user';
 import {Media} from '../../models';
 import {MediaRepository} from '../../repositories';
 
-@api({basePath: `/${EUserRoleEnum.STAFF}`})
+@api({basePath: `/${EAccountType.STAFF}`})
 export class MediaController {
   constructor(
     @repository(MediaRepository)

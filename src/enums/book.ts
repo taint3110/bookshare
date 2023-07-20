@@ -13,5 +13,6 @@ export enum EBookConditionEnum {
 export enum EBookStatusEnum {
   AVAILABLE = 'available',
   UNAVAILABLE = 'unavailable',
+  ORDERED = 'ordered',
   RENTED = 'rented',
 }

@@ -132,9 +132,29 @@ export function getTitleFilterPipeline(
     const titleQuery: AggregationPipeline = [
       {
         $addFields: {
-          regexUnitNumber: {
+          regexTitle: {
             $regexMatch: {
               input: {$toString: '$title'},
+              regex: `.*${trim(titleFilter)}.*`,
+              options: 'i',
+            },
+          },
+          authorString: {
+            $reduce: {
+              input: '$author', // Replace "authors" with your actual array field
+              initialValue: '',
+              in: {
+                $concat: ['$$value', '$$this'],
+              },
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          regexAuthor: {
+            $regexMatch: {
+              input: {$toString: '$authorString'},
               regex: `.*${trim(titleFilter)}.*`,
               options: 'i',
             },
@@ -144,12 +164,12 @@ export function getTitleFilterPipeline(
       {
         $match: {
           $expr: {
-            $or: ['$regexUnitNumber'],
+            $or: ['$regexTitle', '$regexAuthor'],
           },
         },
       },
       {
-        $unset: ['regexUnitNumber'],
+        $unset: ['regexTitle', 'regexAuthor'],
       },
     ];
     return titleQuery;

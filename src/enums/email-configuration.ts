@@ -1,0 +1,4 @@
+export enum EEmailConfigurationId {
+  RESET_PASSWORD = 'RESET_PASSWORD',
+  ACTIVATE_ACCOUNT = 'ACTIVATE_ACCOUNT',
+}
