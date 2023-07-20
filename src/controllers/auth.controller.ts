@@ -136,7 +136,7 @@ export class AuthController {
       role: userData.role,
       name: userData.name,
       accountType: userData?.accountType ?? EAccountType.CUSTOMER,
-      phoneNumber: String(userData?.phoneNumber) ?? '',
+      phoneNumber: String(userData?.phoneNumber ?? '') ?? '',
       firstName: userData?.firstName ?? '',
       lastName: userData?.lastName ?? '',
       isActive: true,

@@ -25,6 +25,11 @@ export class Order extends Entity {
   totalPrice?: number;
 
   @property({
+    type: 'number',
+  })
+  totalBonusPointPrice?: number;
+
+  @property({
     type: 'string',
   })
   description?: string;
@@ -45,6 +50,11 @@ export class Order extends Entity {
     default: new Date(),
   })
   createdAt?: Date;
+
+  @property({
+    type: 'date',
+  })
+  dueDate?: Date;
 
   @property({
     type: 'date',

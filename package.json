@@ -65,6 +65,7 @@
     "@types/passport-google-oauth2": "^0.1.5",
     "@types/passport-oauth2": "^1.4.12",
     "bcryptjs": "^2.4.3",
+    "dayjs": "^1.11.9",
     "dotenv": "^16.3.1",
     "lodash": "^4.17.21",
     "loopback-connector-mongodb": "^5.6.0",

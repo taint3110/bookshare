@@ -18,6 +18,8 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
+import dayjs from 'dayjs';
+import {EOrderStatusEnum} from '../../enums/order';
 import {EAccountType} from '../../enums/user';
 import {Order} from '../../models';
 import {OrderRepository} from '../../repositories';
@@ -126,7 +128,16 @@ export class StaffOrderController {
     })
     order: Order,
   ): Promise<void> {
-    await this.orderRepository.updateById(id, order);
+    await this.orderRepository.updateById(id, {
+      ...order,
+      updatedAt: new Date(),
+      dueDate:
+        order?.orderStatus === EOrderStatusEnum.DONE && !order?.dueDate
+          ? dayjs(new Date())
+              .add(order?.rentLength ?? 1, 'month')
+              .toDate()
+          : order?.dueDate,
+    });
   }
 
   @put('/orders/{id}')
@@ -165,3 +176,4 @@ export class StaffOrderController {
     return this.orderService.paginate(filter);
   }
 }
+

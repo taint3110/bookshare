@@ -18,17 +18,23 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
+import omit from 'lodash/omit';
+import {EBookStatusEnum} from '../../enums/book';
+import {EOrderStatusEnum} from '../../enums/order';
 import {EAccountType} from '../../enums/user';
-import {Order} from '../../models';
-import {OrderRepository} from '../../repositories';
+import {Book, Order} from '../../models';
+import {BookRepository, OrderRepository} from '../../repositories';
 import {OrderService} from '../../services';
 import {PaginationList} from '../../types';
+import {getValidArray} from '../../utils/common';
 
 @api({basePath: `/${EAccountType.CUSTOMER}`})
 export class OrderController {
   constructor(
     @repository(OrderRepository)
     public orderRepository: OrderRepository,
+    @repository(BookRepository)
+    public bookRepository: BookRepository,
     @service(OrderService)
     public orderService: OrderService,
   ) {}
@@ -111,22 +117,66 @@ export class OrderController {
     return this.orderService.getDetails(id);
   }
 
-  @patch('/orders/{id}')
+  @patch('/orders')
   @response(204, {
     description: 'Order PATCH success',
   })
   async updateById(
-    @param.path.string('id') id: string,
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Order, {partial: true}),
+          schema: getModelSchemaRef(Order, {
+            partial: true,
+            includeRelations: true,
+          }),
         },
       },
     })
     order: Order,
   ): Promise<void> {
-    await this.orderRepository.updateById(id, order);
+    const foundOrder: Order | null = await this.orderRepository.findOne({
+      where: {userId: order?.userId, orderStatus: EOrderStatusEnum.NEW},
+    });
+    if (foundOrder) {
+      let totalPrice = 0;
+      let totalBonusPointPrice = 0;
+      if (Array.isArray(order?.bookList) && order?.bookList.length > 0) {
+        getValidArray(order?.bookList).map(async (book: Book) => {
+          if (book.bookStatus === EBookStatusEnum.ORDERED) {
+            totalPrice += book?.price ?? 0;
+            totalBonusPointPrice += book?.bonusPointPrice ?? 0;
+          }
+          await this.bookRepository.updateById(book.id, {
+            ...book,
+            orderId: foundOrder.id,
+          });
+        });
+        await this.orderRepository.updateById(foundOrder.id, {
+          ...omit(order, 'bookList', 'id'),
+          totalPrice,
+          totalBonusPointPrice,
+        });
+        return;
+      }
+    }
+    if (Array.isArray(order?.bookList) && order?.bookList.length > 0) {
+      const newOrder: Order = await this.orderRepository.create({
+        ...omit(order, 'bookList', 'id'),
+        orderStatus: EOrderStatusEnum.NEW,
+        rentLength: 1,
+        totalPrice: order.bookList[0].price,
+        totalBonusPointPrice: order.bookList[0].bonusPointPrice,
+      });
+      getValidArray(order?.bookList).map(async (book: Book) => {
+        await this.bookRepository.updateById(book.id, {
+          ...book,
+          orderId:
+            book?.bookStatus === EBookStatusEnum.ORDERED
+              ? newOrder?.id
+              : order?.id,
+        });
+      });
+    }
   }
 
   @put('/orders/{id}')
