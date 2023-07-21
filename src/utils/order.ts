@@ -8,13 +8,31 @@ import {convertLoopbackFilterOrderToMongoAggregationSort} from './filter';
 export function getDefaultPipeline(
   filter?: Filter<Order>,
 ): AggregationPipeline {
+  const userId = String(get(filter, 'where.userId', ''));
+
   return [
     {
-      $match: {
-        isDeleted: {
-          $ne: true,
+      $addFields: {
+        idToString: {
+          $toString: '$userId',
         },
       },
+    },
+    {
+      $match: userId
+        ? {
+            isDeleted: {
+              $ne: true,
+            },
+            idToString: {
+              $eq: userId,
+            },
+          }
+        : {
+            isDeleted: {
+              $ne: true,
+            },
+          },
     },
     {
       $lookup: {
@@ -167,6 +185,9 @@ export function getDefaultPipeline(
         createdAt: '$createdAt',
         updatedAt: '$updatedAt',
         bookList: '$book',
+        totalPrice: '$totalPrice',
+        userId: '$userId',
+        dueDate: '$dueDate',
       },
     },
     {
@@ -382,6 +403,7 @@ export function getBookDetailPipeline(orderId: string): AggregationPipeline {
         createdAt: '$createdAt',
         updatedAt: '$updatedAt',
         bookList: '$book',
+        totalPrice: '$totalPrice',
       },
     },
   ];

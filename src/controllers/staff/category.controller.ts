@@ -18,11 +18,11 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
-import {EUserRoleEnum} from '../../enums/user';
+import {EAccountType} from '../../enums/user';
 import {Category} from '../../models';
 import {CategoryRepository, MediaRepository} from '../../repositories';
 
-@api({basePath: `/${EUserRoleEnum.STAFF}`})
+@api({basePath: `/${EAccountType.STAFF}`})
 export class CategoryController {
   constructor(
     @repository(CategoryRepository)

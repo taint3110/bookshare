@@ -19,13 +19,13 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
-import {EUserRoleEnum} from '../../enums/user';
+import {EAccountType} from '../../enums/user';
 import {Series} from '../../models';
 import {MediaRepository, SeriesRepository} from '../../repositories';
 import {SeriesService} from '../../services/series.service';
 import {PaginationList} from '../../types';
 
-@api({basePath: `/${EUserRoleEnum.STAFF}`})
+@api({basePath: `/${EAccountType.STAFF}`})
 export class SeriesController {
   constructor(
     @repository(SeriesRepository)

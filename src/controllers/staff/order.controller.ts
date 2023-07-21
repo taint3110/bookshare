@@ -18,14 +18,16 @@ import {
   requestBody,
   response,
 } from '@loopback/rest';
-import {EUserRoleEnum} from '../../enums/user';
+import dayjs from 'dayjs';
+import {EOrderStatusEnum} from '../../enums/order';
+import {EAccountType} from '../../enums/user';
 import {Order} from '../../models';
 import {OrderRepository} from '../../repositories';
 import {OrderService} from '../../services';
 import {PaginationList} from '../../types';
 
-@api({basePath: `/${EUserRoleEnum.STAFF}`})
-export class OrderController {
+@api({basePath: `/${EAccountType.STAFF}`})
+export class StaffOrderController {
   constructor(
     @repository(OrderRepository)
     public orderRepository: OrderRepository,
@@ -126,7 +128,16 @@ export class OrderController {
     })
     order: Order,
   ): Promise<void> {
-    await this.orderRepository.updateById(id, order);
+    await this.orderRepository.updateById(id, {
+      ...order,
+      updatedAt: new Date(),
+      dueDate:
+        order?.orderStatus === EOrderStatusEnum.DONE && !order?.dueDate
+          ? dayjs(new Date())
+              .add(order?.rentLength ?? 1, 'month')
+              .toDate()
+          : order?.dueDate,
+    });
   }
 
   @put('/orders/{id}')
@@ -165,3 +176,4 @@ export class OrderController {
     return this.orderService.paginate(filter);
   }
 }
+
