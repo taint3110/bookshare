@@ -16,10 +16,7 @@ require('dotenv').config();
 const CMS_RESET_PASSWORD_PATH = 'cms/reset-password/';
 const WEBSITE_RESET_PASSWORD_PATH = '?resetPassword=';
 
-const SENDGRID_API_KEY =
-  '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';
-
-sgMail.setApiKey(SENDGRID_API_KEY);
+sgMail.setApiKey('');
 
 export async function sendResetPasswordEmail(
   user: User,
