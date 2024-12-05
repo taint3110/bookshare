@@ -8,3 +8,4 @@ export * from './user.repository';
 export * from './user-credentials.repository';
 export * from './user-identity.repository';
 export * from './email-configuration.repository';
+export * from './person.repository';

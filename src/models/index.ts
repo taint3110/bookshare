@@ -9,3 +9,4 @@ export * from './user-credentials.model';
 export * from './user-identity.model';
 export * from './user-with-password.model';
 export * from './email-configuration.model';
+export * from './person.model';

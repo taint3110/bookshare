@@ -5,3 +5,4 @@ export * from './category-book-category.controller';
 export * from './series-book.controller';
 export * from './series-media.controller';
 export * from './user-order.controller';
+export * from './person.controller';
