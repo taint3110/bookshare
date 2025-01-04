@@ -28,9 +28,7 @@ import {
 import {BookService} from '../../services';
 import {PaginationList} from '../../types';
 import {getValidArray} from '../../utils/common';
-import {authenticate} from '@loopback/authentication';
 
-@authenticate('jwt')
 @api({basePath: `/${EAccountType.STAFF}`})
 export class BookController {
   constructor(
